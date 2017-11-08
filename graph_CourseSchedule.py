@@ -47,59 +47,6 @@ def can_finish(numCourses, prerequisites):
             return False
     return True
 
-"""
-# dfs, add v to visited
-# go through edgelist, add first v to visited set
-# check if second v is in visited
-# if second v in visited, then cycled detected
-# else, go thru neighbors
-def can_finish(numCourses, prerequisites):
-    if len(prerequisites) == 0 or numCourses == 0:
-        return True
-
-    visited = set()
-    reqlist = [[] for i in range(numCourses)]
-
-    for edge in prerequisites:
-        reqlist[edge[0]].append(edge[1])
-
-    def dfs(nodeindex, visited, reqlist):
-        visited.add(nodeindex)
-        neighbors = reqlist[nodeindex]
-        print('nodeindex ', nodeindex, ' neighbors ', neighbors, ' visited ', visited)
-        for n in neighbors:
-            print('neighbour: ' ,n)
-            if n not in visited:
-                if dfs(n, visited, reqlist) == False:
-                    return False
-            else:
-                return False
-        return True
-
-    for num in range(numCourses):
-        if num not in visited and reqlist[num]:
-            print('dfs index ', num)
-            if dfs(num, visited, reqlist) == False:
-                return False
-        # remove num from reqlist 
-        '''
-        for i in reqlist:
-            if num in i: 
-                print('removing ', num)
-                i.remove(num)
-        '''
-    return True
-"""
-
-"""
-for i in range(len(reqlist)):
-     print('i ', i)
-     ans = ''
-     for el in reqlist[i]:
-         ans += str(el) + ' '
-     print(ans)
- """
-
 print(can_finish(2, [[1,0]])) # True
 print(can_finish(3, [[1,0],[2,0]])) # True
 print(can_finish(3, [[0,1],[0,2],[1,2]])) # True
