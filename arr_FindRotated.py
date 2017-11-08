@@ -24,7 +24,7 @@ def findRotated(nums, target):
     if len(nums) <= 0: return -1 
     start, end = 0, len(nums)-1
     while start <= end:
-        mid = (start + end) / 2
+        mid = int((start + end) / 2)
         if nums[mid] == target: 
             return mid
         # ascending
@@ -41,16 +41,4 @@ def findRotated(nums, target):
                 end = mid-1
     return -1
     
-print(findRotated([4,5,6,7,8,1,2,3], 8))
-
-'''
-def main():
-    nums = sys.argv[1].split(",")
-    nums = [int(i) for i in nums]
-    target = int(sys.argv[2])
-    print findRotated(nums, target)
-
-
-if __name__ == '__main__':
-    main()
-'''
+print(findRotated([4,5,6,7,8,1,2,3], 8)) # 4
