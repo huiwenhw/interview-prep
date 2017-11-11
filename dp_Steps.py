@@ -1,53 +1,40 @@
-"""
-A child is running up a staircase with n steps, and can hop either 1 step, 2 steps, or 3 steps at a time. Implement a method to count how many possible ways the child can run up the stairs.
+'''
+https://leetcode.com/problems/climbing-stairs/description/
+You are climbing a stair case. It takes n steps to reach to the top. Each time you can either climb 1 or 2 steps. In how many distinct ways can you climb to the top?
+Note: Given n will be a positive integer.
+Input: 3
+Output:  3
+Explanation:  There are three ways to climb to the top.
 
-// input = 3, ouput is 4 ways
-// input = 4, ouput is 7 ways
+1. 1 step + 1 step + 1 step
+2. 1 step + 2 steps
+3. 2 steps + 1 step
+'''
 
-Note:
-Approach 1) Implement the solution recursively.
-Approach 2) dynamic programming (top down approach - memoization)
-Approach 3) dynamic programming (bottom up approach)
-"""
+# top down
+def climbstairs(n):
+    arr = [0] * (n+1)
+    return recur(arr, n)
 
-import sys 
-
-def ways(n, steps):
-    # print n, steps
-    if steps == n:
-        # print 'return'
-        return 1
-    if steps > n:
+def recur(arr, n):
+    if n < 0:
         return 0
-    return ways(n, steps+1) + ways(n, steps+2) + ways(n, steps+3)
-
-# array stores the number of ways to reach that step 
-# e.g. arr[2] : # ways to reach 2 steps 
-def top_down(arr, n, steps):
-    print n, steps
-    if steps == n:
-        print 'return 1'
+    if n == 0:
+        arr[0] = 1
         return 1
-    if steps > n:
-        print 'return 0'
-        return 0
-    if arr[steps]: 
-        print 'return arr[steps]: ' + str(arr[steps])
-        return arr[steps]
-    arr[steps] = top_down(arr, n, steps+1) + top_down(arr, n, steps+2) + top_down(arr, n, steps+3)
-    print 'steps: ' + str(steps) + ' arr[steps]: ' + str(arr[steps])
-    return arr[steps] # mistake was to return arr[0]
 
-# usually using for loops 
-def bottom_up(n):
-   return '' 
+    if arr[n]: return arr[n]
+    arr[n] = recur(arr, n-1) + recur(arr, n-2)
+    print(arr)
+    return arr[n]
 
-def main():
-    arg = sys.argv[1]
-    n = int(arg)
-    print ways(n, 0)
-    arr = [0] * (n)
-    print top_down(arr, n, 0)
-
-if __name__ == '__main__':
-    main()
+# bottom up 
+def climbstairs_btm(n):
+    arr = [0] * (n+1)
+    arr[0], arr[1] = 1, 2
+    for i in range(2, len(arr)):
+        arr[i] = arr[i-1] + arr[i-2]
+    return arr[n-1]
+    
+print(climbstairs(2)) # 2
+print(climbstairs_btm(1)) # 1
