@@ -8,12 +8,6 @@ There are a total of 2 courses to take. To take course 1 you should have finishe
 ans: https://discuss.leetcode.com/topic/13412/python-20-lines-dfs-solution-sharing-with-explanation/5
 '''
 
-# Definition for a undirected graph node
-class UndirectedGraphNode:
-    def __init__(self, x):
-        self.label = x
-        self.neighbors = []
-
 def can_finish(numCourses, prerequisites):
     adjlist = [[] for _ in range(numCourses)]
     visited = [0 for _ in range(numCourses)]

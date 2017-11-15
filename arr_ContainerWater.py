@@ -17,6 +17,7 @@ def max_area(height):
     # not <= cause dont have to check with itself, area will be 0
     while start < end:
         area = (end - start) * min(height[start], height[end])
+        print(start, end, area)
         m = max(m, area)
         if height[start] < height[end]:
             start += 1

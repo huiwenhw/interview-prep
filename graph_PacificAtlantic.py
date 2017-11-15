@@ -8,12 +8,6 @@ Water can only flow in four directions (up, down, left, or right) from a cell to
 Find the list of grid coordinates where water can flow to both the Pacific and Atlantic ocean.
 '''
 
-# Definition for a undirected graph node
-class UndirectedGraphNode:
-    def __init__(self, x):
-        self.label = x
-        self.neighbors = []
-
 # keep two bool matrix for pacific and atlantic
 # start from the sides in 
 # Check if current index is <= next index. If yes, then dfs 
@@ -70,4 +64,6 @@ def traverse_matrix(matrix):
             dfs(i, j)
 
 matrix = [[1,2,2,3,5], [3,2,3,4,4], [2,4,5,3,1], [6,7,1,4,5], [5,1,1,2,4]]
+print(matrix)
 print(pacific_atlantic(matrix))
+traverse_matrix(matrix)
