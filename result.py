@@ -1,3 +1,82 @@
+## arr_Calculator.py:
+'''
+https://leetcode.com/problems/basic-calculator/description/
+
+Implement a basic calculator to evaluate a simple expression string.
+The expression string may contain open ( and closing parentheses ), the plus + or minus sign -, non-negative integers and empty spaces .
+
+You may assume that the given expression is always valid.
+Some examples:
+"1 + 1" = 2
+" 2-1 + 2 " = 3
+"(1+(4+5+2)-3)+(6+8)" = 23
+'''
+
+# works 
+# if its digit, get all digits (e.g. could be 20) 
+# keep a signs array, use the previous sign and * either 1 or -1 (if its minus)
+# this ensures that 1-(2-3) = 1+1
+def calc_short(s):
+    total = 0
+    i, signs = 0, [1, 1]
+    while i < len(s):
+        print('%11s   %-16s %2d' % (s[i:], signs, total))
+        ch = s[i]
+        if ch.isdigit():
+            start = i
+            while i < len(s) and s[i].isdigit():
+                i += 1
+            total += int(s[start:i]) * signs.pop()
+            continue
+        if ch in "(+-":
+            signs.append(signs[-1] * [1, -1][ch == '-'])
+        elif ch == ")":
+            signs.pop()
+        print('%11s   %-16s %2d' % (s[i:], signs, total))
+        i += 1
+    return total
+
+# push to stack expressions
+# if +, push 1 
+# if -, push -1
+# if (, push 1
+# if ), pop
+# will not work for '1-(5)' or '2-(5-6)' 
+def calc(s):
+    s = s.replace(' ', '')
+    stack, sumn, snum = [1], 0, ''
+    for i in range(len(s)):
+        print('i ', i, ' s[i] ', s[i], ' s ', stack, ' sum ', sumn)
+        if s[i].isdigit() and s[i+1:i+2].isdigit():
+            snum += s[i]
+        elif s[i].isdigit():
+            snum += s[i]
+            sumn += int(snum) * stack.pop()
+            snum = ''
+        elif s[i] == "+":
+            stack.append(1)
+        elif s[i] == "-":
+            stack.append(-1)
+        elif s[i] == "(":
+            stack.append(1)
+        elif s[i] == ")":
+            stack.pop()
+    return sumn
+
+s = "1+1"
+print(calc_short(s))
+s = "(1-2)+(3-4)"
+print(calc_short(s))
+s = "3-(2+(9-4))"
+print(calc_short(s))
+s = '2-(5-6)'
+print(calc_short(s))
+s = '1-(5)' # -4
+s = ' 30 + ( 25 + 1 ) '
+s = "2-1+2" # 3
+s = "(1+(4+5+2)-3)+(6+8)" # 23
+s = "  30" # 20
+
 ## arr_ColumnNum.py:
 '''
 '''
@@ -96,6 +175,7 @@ def max_area(height):
     # not <= cause dont have to check with itself, area will be 0
     while start < end:
         area = (end - start) * min(height[start], height[end])
+        print(start, end, area)
         m = max(m, area)
         if height[start] < height[end]:
             start += 1
@@ -127,6 +207,52 @@ print(contains_duplicate([1,2,3,4,5,5])) # True
 print(contains_duplicate([1,2,3,4,5])) # False
 print(contains_duplicate_short([1,2,3,4,5,5])) # True 
 print(contains_duplicate([1,2,3,4,5])) # False
+
+## arr_CryptSolution.py:
+'''
+Given array of strings crypt and an array containing the mapping of letters and digits, solution,
+encrypt the words to be word1 + word2 = word3
+
+If crypt, when it is decoded by replacing all of the letters in the cryptarithm with digits using the mapping in solution, becomes a valid arithmetic equation containing no numbers with leading zeroes, the answer is true. If it does not become a valid arithmetic solution, the answer is false.
+'''
+
+def isCryptSolution(crypt, solution):
+    # convert solution to hash
+    d = {}
+    for l in solution:
+        d[l[0]] = l[1]
+
+    nl = []
+    for word in crypt:
+        nw = ''
+        for n in word:
+            nw += d[n]
+        if nw[0] == '0' and len(nw) > 1:
+            return False
+        nl.append(nw)
+
+    if int(nl[0]) + int(nl[1]) == int(nl[2]):
+        return True
+    return False
+
+crypt = ["SEND", "MORE", "MONEY"]
+solution = [['O', '0'],
+        ['M', '1'],
+        ['Y', '2'],
+        ['E', '5'],
+        ['N', '6'],
+        ['D', '7'],
+        ['R', '8'],
+        ['S', '9']]
+print(isCryptSolution(crypt, solution)) # 9567 + 1085 = 10652, True
+
+crypt = ["TEN", "TWO", "ONE"]
+solution = [['O', '1'],
+        ['T', '0'],
+        ['W', '9'],
+        ['E', '5'],
+        ['N', '4']]
+print(isCryptSolution(crypt, solution)) # 054 + 091 = 145, False cause 054 and 091 both contain leading zeroes
 
 ## arr_Degree.py:
 '''
@@ -300,6 +426,227 @@ def findRotated(nums, target):
     
 print(findRotated([4,5,6,7,8,1,2,3], 8)) # 4
 
+## arr_FirstDuplicate.py:
+'''
+Given an array a that contains only numbers in the range from 1 to a.length, find the first duplicate number for which the second occurrence has the minimal index. In other words, if there are more than 1 duplicated numbers, return the number for which the second occurrence has a smaller index than the second occurrence of the other number does. If there are no such elements, return -1.
+
+Example 
+For a = [2, 3, 3, 1, 5, 2], the output should be
+firstDuplicate(a) = 3.
+
+There are 2 duplicates: numbers 2 and 3. The second occurrence of 3 has a smaller index than than second occurrence of 2 does, so the answer is 3.
+
+For a = [2, 4, 3, 5, 1], the output should be
+firstDuplicate(a) = -1.
+'''
+
+import collections 
+
+# once we find the first element, we return 
+def firstDuplicate(a):
+    if sum(a) == (len(a)*(len(a)+1))/2:
+        return -1
+    d = collections.defaultdict(int)
+    index, element = float('inf'), -1
+    for i in range(len(a)):
+        if a[i] in d:
+            element = a[i]
+            break
+        d[a[i]] = 1
+    return element
+
+# use array element to check if there's duplicate
+# use abs(a[i]) so we use the original element and not the 'marked' one 
+# if arr = [2,3,3,1,5,2], 
+# after first round = [2,-3,3,1,5,2] # arr[1] (arr[2]-1) is marked as visited by * -1
+def firstDuplicate_short(a):
+    for i in range(len(a)):
+        if a[abs(a[i])-1]<0:
+            return abs(a[i])
+        else:
+            a[abs(a[i])-1] *= -1
+    return -1
+
+a = [2,3,3,1,5,2]
+print(firstDuplicate(a))
+a = [2,1,3,3,5,2]
+print(firstDuplicate_short(a))
+
+## arr_FirstNotRepeatingChar.py:
+'''
+Given a string s, find and return the first instance of a non-repeating character in it. If there is no such character, return '_'.
+Write a solution that only iterates over the string once and uses O(1) additional memory, since this is what you would be asked to do during a real interview.
+'''
+
+# O(n) time and space
+def first(s):
+    if not s: return '_'
+    d = {}
+    for i in range(len(s)):
+        ch = s[i]
+        if ch not in d:
+            d[ch] = [0, i]
+        d[ch] = [d[ch][0]+1, i]
+    index, key = float('inf'), ''
+    for k, v in d.items():
+        if v[0] == 1 and v[1] < index:
+            index = v[1]
+            key = k
+    return [key, '_'][index == float('inf')]
+
+print(first("abacabad")) # c
+print(first("abacabaabacaba")) # '_'
+
+## arr_LargestRectangleArea.py:
+'''
+https://leetcode.com/problems/largest-rectangle-in-histogram/description/
+Given n non-negative integers representing the histogram's bar height where the width of each bar is 1, find the area of largest rectangle in the histogram.
+
+For example, given heights = [2,1,5,6,2,3], return 10.
+'''
+
+# keep ascending buildings index in a stack
+# if a descending building is detected, pop out the latest building from the stack
+# checks for every peak in the array and keeps the ascending elements 
+# once all ascendings buildings are added at index i, check 
+# use dummy building at the end to calc the 'final' ascending buildings
+def area_short(height):
+    height.append(0)
+    stack = [-1]
+    ans = 0
+    for i in range(len(height)):
+        print('i ', i, ' s ', stack, ' height[i] ', height[i], ' h[s[-1]] ', height[stack[-1]])
+        while height[i] < height[stack[-1]]:
+            print('h[i] ', height[i], ' < h[s[-1]] ', height[stack[-1]])
+            h = height[stack.pop()]
+            w = i - stack[-1] - 1
+            print('h', h, ' w', w, ' hw', h*w, ' i ', i, ' s ', stack)
+            ans = max(ans, h * w)
+        stack.append(i)
+    height.pop()
+    return ans
+
+# naive way TLE
+def area(heights):
+    if not heights: return 0
+    start, end = 0, len(heights)-1
+    area = maxa = 0
+    for i in range(len(heights)):
+        for k in range(i, len(heights)):
+            minn = min(heights[i:k+1])
+            area = ((k-i)+1) * minn
+            maxa = max(maxa, area)
+    return maxa
+
+# didnt pass, did the container way which was wrong
+def area(heights):
+    if not heights: return 0
+    start, end = 0, len(heights)-1
+    area = maxa = 0
+    while start <= end:
+        minn = min(heights[start:end+1])
+        area = ((end-start)+1) * minn
+        print('s ', start, ' e ', end, ' h[s] ', heights[start], ' h[e] ', heights[end], area)
+        maxa = max(maxa, area)
+        if heights[start] <= heights[end]:
+            start += 1
+        elif heights[start] > heights[end]:
+            end -= 1
+    return maxa
+
+
+heights = [4,2,0,3,2,4,3,4]
+heights = [5,5,1,7,1,1,5,2,7,6]
+heights = [1,2,3,4]
+heights = [2,1,5,6,2,3]
+print(area_short(heights))
+heights = [4,3,2,1]
+print(area_short(heights))
+
+'''
+#print(area(heights)) # 10
+heights = [1,5,1]
+print(area_short(heights))
+#print(area(heights)) # 5
+heights = [11]
+print(area_short(heights))
+#print(area(heights)) # 11
+heights = [4,2,0,3,2,4,3,4]
+print(area_short(heights))
+#print(area(heights)) # 10
+heights = [5,5,1,7,1,1,5,2,7,6]
+print(area_short(heights))
+#print(area(heights)) # 12
+'''
+
+## arr_LongestConsecutive.py:
+'''
+https://leetcode.com/problems/longest-consecutive-sequence/description/
+
+Given an unsorted array of integers, find the length of the longest consecutive elements sequence.
+For example, Given [100, 4, 200, 1, 3, 2],
+The longest consecutive elements sequence is [1, 2, 3, 4]. Return its length: 4.
+Your algorithm should run in O(n) complexity.
+'''
+
+# convert nums to a set 
+# go through the set: if curr-1 is not in the set, means its the first element in a sequence 
+# keep a count for every element that's larger 
+# keep a max tracker 
+def longest(nums):
+    if not nums: return 0
+    d = set(nums)
+    print(d)
+    maxn = count = 0
+    for i in d:
+        if i-1 not in d:
+            y = i+1
+            while y in d:
+                y+=1
+            maxn = max(maxn, y-i)
+    return maxn
+
+# [100, 4, 200, 1, 3, 2]
+# add these to a dict 
+# for every element, check if there's a elem before/after it 
+# if before, add elem to set in elem-1, assign d[elem] = d[elem-1]
+# if after, add d[elem+1] to d[elem]
+"""
+def longest(nums):
+    if not nums: return 0
+    d = {}
+    maxn = 0
+    for i in range(len(nums)):
+        print('i ', i, ' nums[i] ', nums[i])
+        print(d)
+        if nums[i] not in d:
+            d[nums[i]] = set()
+        if nums[i]-1 in d and nums[i]+1 in d:
+            d[nums[i]-1].add(nums[i])
+            d[nums[i]].update(d[nums[i]-1])
+            d[nums[i]].update(d[nums[i]+1])
+            newset = d[nums[i]]
+            d[nums[i]-1] = d[nums[i]]
+            d[nums[i]+1] = d[nums[i]]
+        elif nums[i]-1 in d:
+            d[nums[i]-1].add(nums[i])
+            d[nums[i]] = d[nums[i]-1]
+        elif nums[i]+1 in d:
+            d[nums[i]].add(nums[i])
+            d[nums[i]].update(d[nums[i]+1])
+            d[nums[i]+1] = d[nums[i]]
+        else:
+            d[nums[i]] = set({nums[i]})
+        maxn = max(maxn, len(d[nums[i]]))
+        print('aft ', d, maxn)
+    return maxn
+"""         
+
+print(longest([100,4,200,1,3,2])) # 4
+print(longest([1,2,0,1])) # 3
+print(longest([1,3,5,2,4])) # 5 
+print(longest([0,3,7,2,5,8,4,6,0,1])) # 9
+
 ## arr_MaxProductSubarray.py:
 '''
 https://leetcode.com/problems/maximum-product-subarray/description/
@@ -452,23 +799,6 @@ n = 3
 
 import sys
 
-'''
-def missing_number(nums):
-    if len(nums) == 1:
-        if nums[0] == 0:
-            return 1
-        return nums[0]-1
-    mask = 1
-    for num in nums:
-        mask = mask | (1 << num)
-        print num, mask
-    print mask
-    for i in range(len(nums)+1):
-        if mask & (1 << i) == 0:
-            return i
-    return len(nums)
-'''
-
 def missing_number(nums):
     n = len(nums)
     return n*(n+1)/2 - sum(nums)
@@ -480,6 +810,54 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+## arr_Permutations.py:
+'''
+https://leetcode.com/problems/permutations/description/
+Given a collection of distinct numbers, return all possible permutations.
+
+For example,
+[1,2,3] have the following permutations:
+[
+  [1,2,3],
+  [1,3,2],
+  [2,1,3],
+  [2,3,1],
+  [3,1,2],
+  [3,2,1]
+]
+'''
+
+
+def permutations(nums):
+    if len(nums) <= 1:
+        return [nums]
+
+    last = nums[0]
+    oldlist = permutations(nums[1:])
+    newlist = []
+
+    for alist in oldlist:
+        for index in range(len(alist)+1):
+            nlist = list(alist)
+            nlist.insert(index, last)
+            newlist.append(nlist)
+    return newlist
+
+def permute_iter(nums):
+    if len(nums) == 0: return [[]]
+
+    perms = [[]]
+    for num in nums:
+        newperm = []
+        for perm in perms:
+            for i in range(len(perm)+1):
+                newperm.append(perm[:i] + [num] + perm[i:])
+        perms = newperm
+    return perms 
+
+print(permutations([1,2,3])) # [[1, 2, 3], [2, 1, 3], [2, 3, 1], [1, 3, 2], [3, 1, 2], [3, 2, 1]]
+print(permute_iter([1,2,3])) # [[3, 2, 1], [2, 3, 1], [2, 1, 3], [3, 1, 2], [1, 3, 2], [1, 2, 3]]
 
 ## arr_ProductExceptSelf.py:
 '''
@@ -539,6 +917,145 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+## arr_Rotate.py:
+'''
+You are given an n x n 2D matrix that represents an image. Rotate the image by 90 degrees (clockwise).
+'''
+
+# O(n^2) time and space
+def rotate(a):
+    rows, cols = len(a), len(a[0])
+    res = [[] for _ in range(rows)]
+
+    for i in range(rows):
+        for k in range(cols):
+            res[k].insert(0, a[i][k])
+    return res
+
+# O(n^2) time, in-place: no additional memory
+def rotate_inplace(a):
+    rows, cols = len(a), len(a[0])
+    res = [[0 for _ in range(cols)] for _ in range(rows)]
+
+    matrix(a)
+    for i in range(int(rows/2)):
+        start, end = i, rows-1-i
+        offset = 0
+        for k in range(start, end):
+            print('i ', i, ' k ', k, ' start ', start, ' end ', end)
+            temp = a[start][k]
+
+            a[start][k] = a[end-offset][start]
+            a[end-offset][start] = a[end][end-offset]
+            a[end][end-offset] = a[k][end]
+            a[k][end] = temp
+            matrix(a)
+            offset += 1
+    return a
+
+def matrix(a):
+    for i in range(len(a)):
+        print(a[i])
+    print()
+
+a = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+# expected: [[7, 4, 1], [8, 5, 2], [9, 6, 3]]
+print(rotate_inplace(a))
+a = [[10,9,6,3,7], [6,10,2,9,7], [7,6,3,8,2], [8,9,7,9,9], [6,8,6,8,2]]
+# expected: [[6,8,7,6,10],[8,9,6,10,9],[6,7,3,2,6],[8,9,8,9,3],[2,9,2,7,7]]
+print(rotate_inplace(a))
+
+## arr_Sudoku.py:
+'''
+Implement an algorithm that will check whether the given grid of numbers represents a valid Sudoku puzzle according to the layout rules described above. Note that the puzzle represented by grid does not have to be solvable.
+'''
+
+def sudoku2_short(grid):
+    rows, cols = len(grid), len(grid[0])
+
+    for r in range(rows):
+        first, sec = set(), set()
+        for c in range(cols):
+            if grid[c][r] != '.' and grid[c][r] in first:
+                return False
+            first.add(grid[c][r])
+            if grid[r][c] != '.' and grid[r][c] in sec:
+                return False
+            sec.add(grid[r][c])
+
+    # check 3x3
+    for r in range(0, 9, 3):
+        for c in range(0, 9, 3):
+            d = set()
+            nlist = grid[r][c:c+3] + grid[r+1][c:c+3] + grid[r+2][c:c+3]
+            for n in nlist:
+                if n != '.' and n in d:
+                    return False
+                d.add(n)
+    return True
+
+def sudoku2(grid):
+    rows, cols = len(grid), len(grid[0])
+
+    for r in range(rows):
+        first, sec = set(), set()
+        for c in range(cols):
+            # add to dict, ensure that there's no same element 
+            if grid[r][c] == '.' and grid[c][r] == '.':
+                continue
+            if grid[c][r] != '.' and grid[c][r] in first:
+                return False
+            elif grid[c][r] != '.':
+                first.add(grid[c][r])
+            if grid[r][c] != '.' and grid[r][c] in sec:
+                return False
+            elif grid[r][c] != '.':
+                sec.add(grid[r][c])
+
+        # check 3x3
+        for r in range(rows):
+            if r%3 == 0:
+                first, sec, third = set(), set(), set()
+            for c in range(cols):
+                if grid[r][c] == '.':
+                    continue
+                if 0 <= c < 3:
+                    if grid[r][c] in first:
+                        return False
+                    first.add(grid[r][c])
+                if 3 <= c < 6:
+                    if grid[r][c] in sec:
+                        return False
+                    sec.add(grid[r][c])
+                if 6 <= c < 9:
+                    if grid[r][c] in third:
+                        return False
+                    third.add(grid[r][c])
+    return True
+
+grid = [['.', '.', '.', '1', '4', '.', '.', '2', '.'],
+        ['.', '.', '6', '.', '.', '.', '.', '.', '.'],
+        ['.', '.', '.', '.', '.', '.', '.', '.', '.'],
+        ['.', '.', '1', '.', '.', '.', '.', '.', '.'],
+        ['.', '6', '7', '.', '.', '.', '.', '.', '9'],
+        ['.', '.', '.', '.', '.', '.', '8', '1', '.'],
+        ['.', '3', '.', '.', '.', '.', '.', '.', '6'],
+        ['.', '.', '.', '.', '.', '7', '.', '.', '.'],
+        ['.', '.', '.', '5', '.', '.', '.', '7', '.']]
+print(sudoku2(grid)) # True
+print(sudoku2_short(grid)) # True
+grid = [['.', '.', '.', '.', '2', '.', '.', '9', '.'],
+        ['.', '.', '.', '.', '6', '.', '.', '.', '.'],
+        ['7', '1', '.', '.', '7', '5', '.', '.', '.'],
+        ['.', '7', '.', '.', '.', '.', '.', '.', '.'],
+        ['.', '.', '.', '.', '8', '3', '.', '.', '.'],
+        ['.', '.', '8', '.', '.', '7', '.', '6', '.'],
+        ['.', '.', '.', '.', '.', '2', '.', '.', '.'],
+        ['.', '1', '.', '2', '.', '.', '.', '.', '.'],
+        ['.', '2', '.', '.', '3', '.', '.', '.', '.']]
+print(sudoku2(grid)) # False
+print(sudoku2_short(grid)) # False
 
 ## arr_ThreeSum.py:
 """
@@ -800,7 +1317,403 @@ def main():
 if __name__ == '__main__':
     main()
 
-## dp_Steps.py:
+## design_LeastRecentlyUsedCache.py:
+'''
+https://leetcode.com/problems/lru-cache/description/
+'''
+
+class LRUCache(object):
+    def __init__(self, capacity):
+       self.capacity = capacity
+       self.d = {}
+       self.index = 0
+       self.lrulist = []
+
+    def get(self, key):
+        if key not in self.d:
+            return -1
+        i = self.lrulist.index(key)
+        self.lrulist = self.lrulist[:i] + self.lrulist[i+1:] + [key]
+        return self.d.get(key)
+
+    def put(self, key, value):
+        if key in self.d:
+            self.d[key] = value
+            i = self.lrulist.index(key)
+            self.lrulist = self.lrulist[:i] + self.lrulist[i+1:] + [key]
+        elif self.index == self.capacity:
+            self.d.pop(self.lrulist[0], None)
+            self.lrulist = self.lrulist[1:]
+            self.d[key] = value
+            self.lrulist.append(key)
+        else:
+            self.d[key] = value
+            self.lrulist.append(key)
+            self.index += 1
+
+# Using doubly linked list to provide O(1) get / put
+class Node:
+    def __init__(self, k, v):
+        self.key = k
+        self.val = v
+        self.prev = None
+        self.next = None
+
+class LRUCache(object):
+    def __init__(self, capacity):
+        self.capacity = capacity
+        self.d = {}
+        self.head = Node(0, 0)
+        self.tail = Node(0, 0)
+        self.head.head = self.tail 
+        self.tail.prev = self.head 
+
+    def get(self, key):
+        if key not in self.d:
+            return -1
+        n = self.d[key]
+        self.remove(n)
+        self.add(n)
+        return n.val
+
+    def put(self, key, value):
+        if key in self.d:
+            self.remove(self.d[key])
+        n = Node(key, value)
+        self.d[key] = n
+        self.add(n)
+        if len(self.d) > self.capacity:
+            n = self.head.next
+            self.remove(n)
+            self.d.pop(n.key, None)
+
+    def remove(self, node):
+        p = node.prev
+        n = node.next
+        p.next = n
+        n.prev = p
+    
+    def add(self, node):
+        p = self.tail.prev
+        p.next = node
+        self.tail.prev = node
+        node.prev = p
+        node.next = self.tail
+
+def main():
+    obj = LRUCache(2)
+    obj.put(1,1)
+    obj.put(2,2)
+    print(obj.get(1)) # 1
+    obj.put(3,3)
+    print(obj.get(2)) # -1
+    obj.put(4,4)
+    print(obj.get(1)) # -1
+    print(obj.get(3)) # 3
+    print(obj.get(4)) # 4
+    # print(obj.d, obj.lrulist)
+
+    obj = LRUCache(2)
+    print(obj.get(2)) # -1 
+    obj.put(2, 6)
+    print(obj.get(1)) # -1 
+    obj.put(1, 5)
+    obj.put(1, 2)
+    print(obj.get(1)) # 2 
+    print(obj.get(2)) # 6
+    # print(obj.d, obj.lrulist)
+
+    obj = LRUCache(2)
+    obj.put(2,1)
+    obj.put(1,1)
+    obj.put(2,3)
+    obj.put(4,1)
+    print(obj.get(1)) # -1 
+    print(obj.get(2)) # 3
+    # print(obj.d, obj.lrulist)
+
+if __name__ == "__main__":
+    main()
+
+## dp_CoinChange.py:
+'''
+https://leetcode.com/problems/coin-change/description/
+You are given coins of different denominations and a total amount of money amount. Write a function to compute the fewest number of coins that you need to make up that amount. If that amount of money cannot be made up by any combination of the coins, return -1.
+
+Example 1:
+coins = [1, 2, 5], amount = 11
+return 3 (11 = 5 + 5 + 1)
+
+Example 2:
+coins = [2], amount = 3
+return -1.
+'''
+
+# use only one dp array
+# for each amount, create a list of # coins needed to fulfil that amount
+# take the min of that list and store it in dp[current amount]
+# finally, dp[amount] will be number of coins needed 
+# if its float('inf') value, it means that the coins were unable to add up to amount
+def coinchange(coins, amount):
+    maxn = float('inf')
+    dp = [0] + [maxn] * amount
+
+    for i in range(1, amount+1):
+        dp[i] = min([dp[i-c] if i-c >= 0 else maxn for c in coins]) + 1
+    return [dp[amount], -1][dp[amount] == maxn]
+    # means: [falsevalue, truevalue][true condition]
+
+def coinchange_ori(coins, amount):
+    #dp = [[float('inf') for _ in range(amount+1)] for _ in range(len(coins)+1)]
+    coins = [x for x in coins if x <= amount]
+    if amount == 0: return 0
+    if len(coins) == 0: return -1
+
+    dp = [[float('inf') for _ in range(amount+1)] for _ in range(2)]
+    mincoin = min(coins)-1
+
+    for i in range(1, len(coins)+1):
+        ir = i % 2 
+        if amount < coins[i-1]:
+            dp[ir] = dp[ir-1]
+            continue
+        for k in range(1, amount+1):
+            if k == coins[i-1]:
+                dp[ir][k] = 1
+            elif k < coins[i-1]:
+                dp[ir][k] = dp[ir-1][k]
+            else:
+                dp[ir][k] = min(dp[ir][k-coins[i-1]]+1, dp[ir-1][k])
+    #print(dp)
+    if dp[ir][amount] == float('inf'):
+        return -1
+    return dp[ir][amount]
+
+print(coinchange([1,2,5], 11))
+print(coinchange([1,3,4], 6))
+print(coinchange([214783647], 2))
+'''
+print(coinchange([125,146,125,252,226,25,24,308,50], 8402))
+print(coinchange([112,149,215,496,482,436,144,397,500,189], 8480))
+print(coinchange([492,364,366,144,492,316,221,326,16,166,353], 5253))
+print(coinchange([9,183,255,407,102,174,230], 627)) # 9
+print(coinchange([84,457,478,309,350,349,422,469,100,432,188], 6993))
+'''
+
+## dp_CombinationSumIV.py:
+'''
+https://leetcode.com/problems/combination-sum-iv/description/
+
+Given an integer array with all positive numbers and no duplicates, find the number of possible combinations that add up to a positive integer target.
+
+Example:
+
+nums = [1, 2, 3], target = 4
+
+The possible combination ways are:
+(1, 1, 1, 1)
+(1, 1, 2)
+(1, 2, 1)
+(1, 3)
+(2, 1, 1)
+(2, 2)
+(3, 1)
+
+Note that different sequences are counted as different combinations.
+Therefore the output is 7.
+'''
+
+# dp[i] == how many ways to reach this 
+# dp[0] = 0
+def combi(nums, target):
+    dp = [0] * (target+1)
+
+    for i in range(1, target+1):
+        for k in range(len(nums)):
+            if i == nums[k]:
+                dp[i] += 1
+            elif i > nums[k]:
+                dp[i] += dp[i-nums[k]]
+    return dp[-1]
+
+print(combi([1,2,3], 4))
+
+## dp_DecodeWays.py:
+'''
+https://leetcode.com/problems/decode-ways/description/
+
+A message containing letters from A-Z is being encoded to numbers using the following mapping:
+'A' -> 1, 'B' -> 2, ..., 'Z' -> 26
+Given an encoded message containing digits, determine the total number of ways to decode it.
+
+For example, Given encoded message "12", it could be decoded as "AB" (1 2) or "L" (12). The number of ways decoding "12" is 2.
+'''
+
+def num_decodings(s):
+    if len(s) == 0: return 0
+    if s[0] == "0": return 0
+    ways = 1
+    for i in range(1, len(s)):
+        if s[i-1:i+1] == "00": return 0
+        elif s[i-1] == "0" or s[i] == "0": continue
+        elif int(s[i-1:i+1]) <= 26:
+            ways += 1
+    return ways
+
+# use int(s>'') to assign 1 / 0 to ways 
+# if we reach a '0', discard prev ways, find if [i-1,i] is btwn 9 and 27
+# if it is, means its 10/20 and we're discarding all the '02, 03 ..' at this check
+# and we multiply that to prev num of ways to ensure that we can cont decoding
+def decodings(s):
+    pways, ways, pdigit = 0, int(s>''), ''
+    for d in s:
+        pways, ways, pdigit = ways, (d>'0')*ways + (9<int(pdigit+d)<27)*pways, d
+        print('d ', d, ' pways ', pways, ' ways ', ways, ' pdigit ', pdigit)
+    return ways
+
+print(decodings("1234")) # 3
+print(decodings("10")) # 1
+print(decodings("100")) # 0
+print(decodings("0")) # 0
+print(decodings("01")) # 0
+print(decodings("101")) # 1
+print(decodings("11")) # 2
+print(decodings("110")) # 1
+print(decodings("11011")) # 2
+
+## dp_HouseRobber.py:
+'''
+https://leetcode.com/problems/house-robber/description/
+
+You are a professional robber planning to rob houses along a street. Each house has a certain amount of money stashed, the only constraint stopping you from robbing each of them is that adjacent houses have security system connected and it will automatically contact the police if two adjacent houses were broken into on the same night.
+
+Given a list of non-negative integers representing the amount of money of each house, determine the maximum amount of money you can rob tonight without alerting the police.
+'''
+
+# dp[i] contains max amt
+# check from dp[0:i-1], what's the max amount
+# use that 
+# O(n) time and space
+def rob(nums):
+    if not nums: return 0
+    dp = [0] * len(nums)
+    for i in range(len(nums)):
+        if i-1 > 0:
+            dp[i] = nums[i] + max(dp[:i-1])
+        else:
+            dp[i] = nums[i]
+    return max(dp)
+
+# O(n) time, O(1) space
+def rob_constant(nums):
+    if not nums: return 0
+    # dp = [0] * len(nums)
+    i = e = 0
+    for n in nums:
+        i, e = n + e, max(i, e)
+    return max(i, e)
+
+print(rob([1,2,1,2,1])) # 4
+print(rob([1,2,1,2])) # 4
+print(rob([2,1,1,2])) # 4
+
+print(rob_constant([1,2,1,2,1])) # 4
+print(rob_constant([1,2,1,2])) # 4
+print(rob_constant([2,1,1,2])) # 4
+
+## dp_HouseRobberTwo.py:
+'''
+https://leetcode.com/problems/house-robber-ii/description/
+
+After robbing those houses on that street, the thief has found himself a new place for his thievery so that he will not get too much attention. This time, all houses at this place are arranged in a circle. That means the first house is the neighbor of the last one. Meanwhile, the security system for these houses remain the same as for those in the previous street.
+
+Given a list of non-negative integers representing the amount of money of each house, determine the maximum amount of money you can rob tonight without alerting the police.
+'''
+
+# dp[i] contains max amt
+# check from dp[0:i-1], what's the max amount
+# O(n) time and space
+# take max of nums[1:] and nums[:-1]
+def rob(nums):
+    def rob_inner(nums):
+        print(nums)
+        if not nums: return 0
+        dp = [0] * len(nums)
+        for i in range(len(nums)):
+            if i-1 > 0:
+                dp[i] = nums[i] + max(dp[:i-1])
+            else:
+                dp[i] = nums[i]
+        return max(dp)
+    return max(rob_inner(nums[len(nums) != 1:]), rob_inner(nums[:-1]))
+    # if my len of nums is 1, take [0:] == nums[0] else, take [1:] == []
+
+def rob_short(nums):
+    def rob(nums):
+        now = prev = 0
+        for n in nums:
+            now, prev = max(now, prev+n), now
+        return now
+    return max(rob(nums[len(nums) != 1:]), rob(nums[:-1]))
+
+print(rob([2,1,1,2])) # 3
+print(rob([0,0,0])) # 0
+print(rob([1,1,1])) # 1
+print(rob([1,3,1])) # 3
+print(rob([2,7,9,3,1])) # 11
+print(rob([1,2,1,1])) # 3
+
+print(rob_short([2,7,9,3,1])) # 11
+print(rob_short([1,2,1,1])) # 3
+
+## dp_LongestIncreasingSubsequence.py:
+'''
+https://leetcode.com/problems/longest-increasing-subsequence/description/
+
+Given an unsorted array of integers, find the length of longest increasing subsequence.
+For example,
+Given [10, 9, 2, 5, 3, 7, 101, 18],
+The longest increasing subsequence is [2, 3, 7, 101], therefore the length is 4. Note that there may be more than one LIS combination, it is only necessary for you to return the length.
+'''
+
+def lis(nums):
+    if not nums: return 0
+    dp = [0] * (len(nums))
+        
+    for i in range(len(nums)):
+        maxn = 0
+        for k in range(i, -1, -1):
+            if nums[k] < nums[i]:
+                maxn = max(maxn, dp[k] + 1)
+                dp[i] = maxn
+        if dp[i] == 0: dp[i] = 1
+    return max(dp)
+
+# tails: at i, tails stores the smallest number of each increasing subsequence at length i+1
+# if num is larger than all smallest number, append it to the list
+# else if num is in btwn a certain tail, tails[i-1] < x <= tails[i], change tails[i]
+def lis_short(nums):
+    tails = [0] * len(nums)
+    size = 0
+    for x in nums:
+        i, j = 0, size
+        while i != j:
+            m = int((i + j) / 2)
+            if tails[m] < x:
+                i = m + 1
+            else:
+                j = m
+        tails[i] = x
+        size = max(i + 1, size)
+        print(i, j, tails)
+    return size
+
+#print(lis([10, 9, 2, 5, 3, 7, 101, 18]))
+#print(lis([1,3,6,7,9,4,10,5,6]))
+print(lis_short([10, 9, 2, 5, 3, 7, 101, 18])) # 4
+print(lis_short([1, 3, 4, 2, 10])) # 4
+
+## dp_MeetupSteps.py:
 """
 A child is running up a staircase with n steps, and can hop either 1 step, 2 steps, or 3 steps at a time. Implement a method to count how many possible ways the child can run up the stairs.
 
@@ -854,6 +1767,271 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+## dp_MinPathSum.py:
+'''
+https://leetcode.com/problems/minimum-path-sum/description/
+
+Given a m x n grid filled with non-negative numbers, find a path from top left to bottom right which minimizes the sum of all numbers along its path.
+Note: You can only move either down or right at any point in time.
+
+Example 1:
+[[1,3,1],
+ [1,5,1],
+ [4,2,1]]
+Given the above grid map, return 7. Because the path 1 3 1 1 1 minimizes the sum.
+'''
+
+# O(mn) time, O(mn) space
+def min_path_sum(grid):
+    rows, cols = len(grid), len(grid[0])
+    dp = [[float('inf') for _ in range(cols)] for _ in range(rows)]
+
+    for i in range(rows):
+        for k in range(cols):
+            if i == 0 and k == 0:
+                dp[i][k] = grid[i][k]
+            elif i == 0:
+                dp[i][k] = grid[i][k] + dp[i][k-1]
+            elif k == 0:
+                dp[i][k] = grid[i][k] + dp[i-1][k]
+            else:
+                dp[i][k] = grid[i][k] + min(dp[i-1][k], dp[i][k-1])
+    return dp[rows-1][cols-1]
+
+# O(mn) time, O(2n) space
+def min_space(grid):
+    rows, cols = len(grid), len(grid[0])
+    dp = [[float('inf') for _ in range(cols)] for _ in range(2)]
+
+    for i in range(rows):
+        ir = i%2
+        for k in range(cols):
+            if i == 0 and k == 0:
+                dp[ir][k] = grid[i][k]
+            elif i == 0:
+                dp[ir][k] = grid[i][k] + dp[ir][k-1]
+            elif k == 0:
+                dp[ir][k] = grid[i][k] + dp[ir-1][k]
+            else:
+                dp[ir][k] = grid[i][k] + min(dp[ir-1][k], dp[ir][k-1])
+    return dp[ir][cols-1]
+
+# making it look cleaner
+def min_clean(grid):
+    rows, cols = len(grid), len(grid[0])
+    dp = [[float('inf') for _ in range(cols)] for _ in range(rows)]
+
+    dp[0][0] = grid[0][0]
+    for i in range(1, cols):
+        dp[0][i] = grid[0][i] + dp[0][i-1]
+    for i in range(1, rows):
+        dp[i][0] = grid[i][0] + dp[i-1][0]
+    for i in range(1, rows):
+        for k in range(1, cols):
+            dp[i][k] = grid[i][k] + min(dp[i-1][k], dp[i][k-1])
+    return dp[rows-1][cols-1]
+
+grid = [[1,3,1], [1,5,1], [4,2,1]]
+print(min_path_sum(grid))
+print(min_space(grid))
+print(min_clean(grid))
+
+## dp_Steps.py:
+'''
+https://leetcode.com/problems/climbing-stairs/description/
+You are climbing a stair case. It takes n steps to reach to the top. Each time you can either climb 1 or 2 steps. In how many distinct ways can you climb to the top?
+Note: Given n will be a positive integer.
+Input: 3
+Output:  3
+Explanation:  There are three ways to climb to the top.
+
+1. 1 step + 1 step + 1 step
+2. 1 step + 2 steps
+3. 2 steps + 1 step
+'''
+
+# top down
+def climbstairs(n):
+    arr = [0] * (n+1)
+    return recur(arr, n)
+
+def recur(arr, n):
+    if n < 0:
+        return 0
+    if n == 0:
+        arr[0] = 1
+        return 1
+
+    if arr[n]: return arr[n]
+    arr[n] = recur(arr, n-1) + recur(arr, n-2)
+    print(arr)
+    return arr[n]
+
+# bottom up 
+def climbstairs_btm(n):
+    arr = [0] * (n+1)
+    arr[0], arr[1] = 1, 2
+    for i in range(2, len(arr)):
+        arr[i] = arr[i-1] + arr[i-2]
+    return arr[n-1]
+    
+print(climbstairs(2)) # 2
+print(climbstairs_btm(1)) # 1
+
+## dp_Triangle.py:
+'''
+https://leetcode.com/problems/triangle/description/
+
+Given a triangle, find the minimum path sum from top to bottom. Each step you may move to adjacent numbers on the row below.
+
+For example, given the following triangle
+[
+    [2],
+    [3,4],
+    [6,5,7],
+    [4,1,8,3]
+]
+The minimum path sum from top to bottom is 11 (i.e., 2 + 3 + 5 + 1 = 11).
+'''
+
+import collections 
+
+# bottom up, O(n^2) space
+def minimum_total(triangle):
+    if len(triangle) == 1: return triangle[0][0]
+    
+    dp = [[0 for _ in range(len(triangle))] for _ in range(len(triangle))]
+    for i in range(len(triangle)-1, -1, -1):
+        curr = triangle[i]
+        if i == len(triangle)-1:
+            dp[i] = list(triangle[i])
+            continue
+        for k in range(len(curr)):
+            dp[i][k] = curr[k] + min(dp[i+1][k], dp[i+1][k+1])
+    return dp[0][0]
+
+# bottom up, O(n) space
+def minimum_total_short(triangle):
+    if not triangle: return
+    
+    # dont need to check for length, cause this takes in the last array
+    # which could also be the first if triangle = [[-10]]
+    # and dp[0] will just return -10 cause the loop wont run
+    dp = list(triangle[-1]) # list(triangle[-1]) to copy, and not change the original array
+    for i in range(len(triangle)-2, -1, -1):
+        for k in range(len(triangle[i])):
+            dp[k] = triangle[i][k] + min(dp[k], dp[k+1])
+    return dp[0]
+
+def min_total_topdown(triangle):
+    if not triangle: return 
+    dp = [[0 for _ in range(len(row))] for row in triangle]
+    dp[0][0] = triangle[0][0]
+
+    for i in range(1, len(triangle)):
+        for k in range(len(triangle[i])):
+            if k == 0:
+                dp[i][k] = triangle[i][k] + dp[i-1][k]
+            elif k == len(triangle[i])-1:
+                dp[i][k] = triangle[i][k] + dp[i-1][k-1]
+            else:
+                dp[i][k] = triangle[i][k] + min(dp[i-1][k-1], dp[i-1][k])
+    return min(dp[-1])
+
+triangle = [[2], [3,4], [6,5,7], [4,1,8,3]]
+print(minimum_total(triangle)) # 11
+print(minimum_total_short(triangle)) # 11
+print(min_total_topdown(triangle))
+
+## dp_UniquePaths.py:
+'''
+https://leetcode.com/problems/unique-paths/description/
+
+A robot is located at the top-left corner of a m x n grid (marked 'Start' in the diagram below).
+
+The robot can only move either down or right at any point in time. The robot is trying to reach the bottom-right corner of the grid (marked 'Finish' in the diagram below).
+
+How many possible unique paths are there?
+'''
+
+# m = rows, n = cols
+# dp[i][k] stores number of unique paths to reach that grid
+# and that's a combination of the up and the left grids 
+# if its row 0 or col 0, there can only be one way to reach that grid
+# initialise row 0 and col 0 to 1 
+# O(n^2) time and space 
+def paths(m, n):
+    dp = [[0 for _ in range(n)] for _ in range(m)]
+    for i in range(m):
+        for k in range(n):
+            if i == 0:
+                dp[i][k] = 1
+            elif k == 0:
+                dp[i][k] = 1
+            else:
+                dp[i][k] = dp[i-1][k] + dp[i][k-1]
+    return dp[m-1][n-1]
+
+def paths_refactor(m, n):
+    dp = [[1 for _ in range(n)] for _ in range(m)]
+    for i in range(1, m):
+        for k in range(1, n):
+            dp[i][k] = dp[i-1][k] + dp[i][k-1]
+    return dp[m-1][n-1]
+
+# O(mn) time, O(n) space
+# init all to 1, start from row 1 col 1
+# using just one array, 
+def paths_refactor_short(m, n):
+    dp = [1] * n
+    for i in range(1, m):
+        for k in range(1, n):
+            dp[k] += dp[k-1]
+    return dp[n-1]
+
+print(paths(2,2)) # 2
+print(paths(1,2)) # 1 
+print(paths_refactor(1,2)) # 1
+print(paths_refactor(4,4)) # 20
+print(paths_refactor_short(1,2)) # 1
+print(paths_refactor_short(2,3)) # 3
+
+## dp_WordBreak.py:
+'''
+https://leetcode.com/problems/word-break/description/
+
+Given a non-empty string s and a dictionary wordDict containing a list of non-empty words, determine if s can be segmented into a space-separated sequence of one or more dictionary words. You may assume the dictionary does not contain duplicate words.
+
+For example, given
+s = "leetcode", dict = ["leet", "code"].
+Return true because "leetcode" can be segmented as "leet code".
+'''
+
+# any returns as early as it sees the first True value
+def wordbreak(s, wordDict):
+    ok = [True]
+    for i in range(1, len(s)+1):
+        # ok += [any(ok[j] and s[j:i] in wordDict for j in range(i))] # both works
+        ok += any(ok[j] and s[j:i] in wordDict for j in range(i)),
+        print(ok)
+    return ok[-1]
+
+def wordbreak_readable(s, wordDict):
+    dp = [False for _ in range(len(s)+1)]
+    dp[0] = True
+
+    # dp[i] == True means: I can start my next word from there 
+    for i in range(len(s)):
+        for k in range(i, len(s)):
+            if dp[i] and s[i:k+1] in wordDict:
+                dp[k+1] = True
+    return dp[-1]
+
+print(wordbreak("leetcode", ["leet", "code"])) # True
+print(wordbreak("water", ["wa", "ater"])) # False
+print(wordbreak_readable("leetcode", ["leet", "code"])) # True
+print(wordbreak_readable("water", ["wa", "ater"])) # False
 
 ## graph_CloneGraph.py:
 '''
@@ -964,12 +2142,6 @@ There are a total of 2 courses to take. To take course 1 you should have finishe
 ans: https://discuss.leetcode.com/topic/13412/python-20-lines-dfs-solution-sharing-with-explanation/5
 '''
 
-# Definition for a undirected graph node
-class UndirectedGraphNode:
-    def __init__(self, x):
-        self.label = x
-        self.neighbors = []
-
 def can_finish(numCourses, prerequisites):
     adjlist = [[] for _ in range(numCourses)]
     visited = [0 for _ in range(numCourses)]
@@ -1011,6 +2183,58 @@ print(can_finish(4, [[0,1],[1,2],[2,3]])) # True
 print(can_finish(4, [[1,0],[2,1],[3,2],[1,3]])) # False
 print(can_finish(4, [[0,1],[1,2],[0,3],[3,0]])) # False
 
+## graph_NumIslands.py:
+'''
+https://leetcode.com/problems/number-of-islands/description/
+Given a 2d grid map of '1's (land) and '0's (water), count the number of islands. An island is surrounded by water and is formed by connecting adjacent lands horizontally or vertically. You may assume all four edges of the grid are all surrounded by water.
+
+Example 1:
+11110
+11010
+11000
+00000
+Answer: 1
+
+Example 2:
+11000
+11000
+00100
+00011
+Answer: 3
+'''
+
+def islands(grid):
+    if not grid: return 0
+    rows, cols = len(grid), len(grid[0])
+
+    def dfs(i, j):
+        # if 0, stop and go back 
+        if grid[i][j] == 0:
+            return
+        grid[i][j] = 0
+        
+        directions = ((1, 0), (0, 1), (-1, 0), (0, -1))
+        for direction in directions:
+            next_i, next_j = i+direction[0], j+direction[1]
+            if 0 <= next_i < rows and 0 <= next_j < cols:
+                dfs(next_i, next_j)
+
+    num = 0
+    for i in range(rows):
+        for k in range(cols):
+            # if 1, search its neighbors, mark neighbors as 0
+            if grid[i][k] == 1:
+                dfs(i, k)
+                num += 1
+    return num
+
+grid = [[1,1,1,1,0], [1,1,0,1,0], [1,1,0,0,0], [0,0,0,0,0]]
+print(islands(grid)) # 1
+grid = [[1,1,0,0,0], [1,1,0,0,0], [0,0,1,0,0], [0,0,0,1,1]]
+print(islands(grid)) # 3
+grid = [[0,0,0,0,0], [1,1,1,1,1], [0,0,0,0,0], [1,1,1,1,1]]
+print(islands(grid)) # 2
+
 ## graph_PacificAtlantic.py:
 '''
 https://leetcode.com/problems/pacific-atlantic-water-flow/description/
@@ -1021,12 +2245,6 @@ Water can only flow in four directions (up, down, left, or right) from a cell to
 
 Find the list of grid coordinates where water can flow to both the Pacific and Atlantic ocean.
 '''
-
-# Definition for a undirected graph node
-class UndirectedGraphNode:
-    def __init__(self, x):
-        self.label = x
-        self.neighbors = []
 
 # keep two bool matrix for pacific and atlantic
 # start from the sides in 
@@ -1084,7 +2302,9 @@ def traverse_matrix(matrix):
             dfs(i, j)
 
 matrix = [[1,2,2,3,5], [3,2,3,4,4], [2,4,5,3,1], [6,7,1,4,5], [5,1,1,2,4]]
+print(matrix)
 print(pacific_atlantic(matrix))
+traverse_matrix(matrix)
 
 ## Inorder.py:
 # Definition for a binary tree node.
@@ -1599,6 +2819,82 @@ def trailing_recur(n):
 print(trailing(25)) # 6
 print(trailing_recur(25)) # 6
 
+## matrix_SetZeroes.py:
+'''
+https://leetcode.com/problems/set-matrix-zeroes/description/
+Given a m x n matrix, if an element is 0, set its entire row and column to 0. Do it in place.
+Follow up: Did you use extra space?
+A straight forward solution using O(mn) space is probably a bad idea.
+A simple improvement uses O(m + n) space, but still not the best solution.
+Could you devise a constant space solution?
+'''
+
+# O(n^2) time, O(m + n) space
+def setzeroes(matrix):
+    rows = len(matrix)
+    cols = len(matrix[0])
+    r = [False for _ in range(rows)]
+    c = [False for _ in range(cols)]
+
+    # keep track of where the 0s are 
+    for i in range(rows):
+        for k in range(cols):
+            if matrix[i][k] == 0:
+                r[i] = True
+                c[k] = True
+    # set the zeroes
+    for i in range(rows):
+        for k in range(cols):
+            if r[i] or c[k]:
+                matrix[i][k] = 0
+    print(matrix)
+
+# using constant space, but still O(n^2) time
+def followup(matrix):
+    rows, cols = len(matrix), len(matrix[0])
+    rowzero, colzero = False, False
+
+    # first: mark if row 0 and col 0 have 0s in them 
+    for i in range(rows):
+        if matrix[i][0] == 0:
+            colzero = True
+    for i in range(cols):
+        if matrix[0][i] == 0:
+            rowzero = True
+
+    # second: loop through matrix. if position [i][k] == 0,
+    # use the first row/col to mark. [i][0] = 0 and [0][k] = 0
+    for i in range(1, rows):
+        for k in range(1, cols):
+            if matrix[i][k] == 0:
+                matrix[i][0] = 0
+                matrix[0][k] = 0
+
+    # third: loop through matrix again. if row / col is marked ^, then set that entire row / col to 0
+    for i in range(1, rows):
+        if matrix[i][0] == 0:
+            for k in range(1, cols):
+                matrix[i][k] = 0
+    for i in range(1, cols):
+        if matrix[0][i] == 0:
+            for k in range(1, rows):
+                matrix[k][i] = 0
+
+    # fourth: if row 0 or col 0 had a 0 initially, set entire row / col to 0
+    if rowzero:
+        matrix[0] = [0] * cols
+    if colzero:
+        for i in range(rows):
+            matrix[i][0] = 0
+    print(matrix)
+
+matrix = [[1,1,1],[1,0,1],[1,1,1]]
+setzeroes(matrix) # [[1, 0, 1], [0, 0, 0], [1, 0, 1]]
+matrix = [[1,1,1],[0,1,1],[1,1,1]]
+followup(matrix) # [[0, 1, 1], [0, 0, 0], [0, 1, 1]]
+matrix = [[0,0,0,5],[4,3,1,4],[0,1,1,4],[1,2,1,3],[0,0,1,1]]
+followup(matrix) # [[0, 0, 0, 0], [0, 0, 0, 4], [0, 0, 0, 0], [0, 0, 0, 3], [0, 0, 0, 0]]
+
 ## RectArea.py:
 """
 https://leetcode.com/problems/rectangle-area/description/
@@ -1762,6 +3058,84 @@ with open("result.py", "w") as outfile:
             outfile.write(infile.read())
             outfile.write("\n")
 
+## sort_Bubble.py:
+# Swaps elements from 0...sorted index, bringing max to the end each time
+# Best: O(n) sorted arr, Worst: O(n^2), In-place, Stable, Extra O(1)
+def bubblesort(arr):
+    n = len(arr)
+
+    for i in range(n):
+        swapped = False
+        for k in range(n-i-1):
+            if arr[k] > arr[k+1]:
+                swapped = True
+                arr[k], arr[k+1] = arr[k+1], arr[k]
+        # if arr is sorted, don't need to spend time going through the arr again
+        if not swapped: break
+        print(arr)
+
+arr = [64, 90, 34, 25, 12, 22, 11]
+bubblesort(arr)
+print('sorted arr: ', arr)
+
+
+## sort_Insertion.py:
+# Takes curr, moves elem up the list, places elem at found position in front
+# Best O(n), Worst O(n^2) when reversed, In-place, Stable, Extra O(1)
+# Insertion/Selection: Faster for small arrays
+def insertion(arr):
+    for i in range(1, len(arr)):
+        key = arr[i]
+        k = i-1
+
+        # using k to move elements up the list
+        while k >= 0 and key < arr[k]:
+            arr[k+1] = arr[k]
+            k -= 1
+        arr[k+1] = key
+        print(arr, ' moving: ', key)
+
+arr = [12, 11, 13, 5, 6]
+insertion(arr)
+print('sorted: ', arr)
+
+## sort_Selection.py:
+# finds min elem, swap with first elem of unsorted subarray
+# Best/Worst: O(n^2), Inplace, Stable, Extra O(1) space
+# Insertion/Selection: Faster for small arrays
+def selection(arr):
+    n = len(arr)
+
+    for i in range(n):
+        min_i = i
+        for k in range(i+1, n):
+            if arr[k] < arr[min_i]:
+                min_i = k
+
+        # swap min elem with first elem
+        arr[i], arr[min_i] = arr[min_i], arr[i]
+        print(arr, 'swapping ', arr[i], arr[min_i])
+
+arr = [64, 25, 12, 22, 11]
+print(arr, ' original')
+selection(arr)
+print(arr, ' sorted')
+
+## test.py:
+def test():
+    s = "yxyxyxyxyxioio"
+    d = {}
+    newstr = ''
+    vowels = ['a', 'e', 'i', 'o', 'u']
+    for ch in s:
+        if ch not in vowels and ch not in newstr:
+            newstr += ch
+        print('ch ', ch, ' newstr ', newstr)
+        d[ch] = True
+    print(newstr)
+
+print(test())
+
 ## tree_Buildtree.py:
 # Definition for a binary tree node.
 class TreeNode(object):
@@ -1805,6 +3179,77 @@ preorder = [8,5,9,7,1,12,2,4,11,3]
 inorder = [9,5,1,7,2,12,8,4,3,11]
 root = build_tree(preorder, inorder)
 print(level_order(root))
+
+## tree_HasPathSum.py:
+'''
+https://leetcode.com/problems/path-sum/description/
+
+determine if the tree has a root-to-leaf path such that adding up all the values along the path equals the given sum.
+For example: given the below binary tree and sum = 22,
+              5
+             / \
+            4   8
+           /   / \
+          11  13  4
+         /  \      \
+        7    2      1
+return true, as there exist a root-to-leaf path 5->4->11->2 which sum is 22.
+'''
+
+# Definition for a binary tree node.
+class TreeNode:
+    def __init__(self, x):
+        self.val = x
+        self.left = None
+        self.right = None
+
+def haspathsum_short(root, sumn):
+    if not root:
+        return False
+
+    if not root.left and not root.right and root.val == sumn:
+        return True
+
+    sumn -= root.val
+    return haspathsum_short(root.left, sumn) or haspathsum_short(root.right, sumn)
+
+def haspathsum(root, sumn):
+    if not root: return False
+    return findpath(root, 0, sumn)
+
+def findpath(root, curr, sumn):
+    print(curr, root.val, sumn)
+    if root.left and root.right:
+        return findpath(root.left, curr+root.val, sumn) or findpath(root.right, curr+root.val, sumn)
+    elif root.left:
+        return findpath(root.left, curr+root.val, sumn)
+    elif root.right:
+        return findpath(root.right, curr+root.val, sumn)
+    else:
+        if curr + root.val == sumn:
+            return True
+    return False
+
+root = TreeNode(1)
+root.left = TreeNode(2)
+print(haspathsum_short(root, 1))
+print(haspathsum(root, 1))
+
+root = TreeNode(1)
+root.left = TreeNode(2)
+root.left.left = TreeNode(3)
+root.left.left.left = TreeNode(4)
+root.left.left.left.left = TreeNode(5)
+print(haspathsum_short(root, 6))
+print(haspathsum(root, 6))
+
+root = TreeNode(5)
+root.left = TreeNode(4)
+root.left.left = TreeNode(11)
+root.left.left.right = TreeNode(2)
+root.left.left.left = TreeNode(7)
+print(haspathsum_short(root, 22))
+print(haspathsum(root, 22))
 
 ## tree_InvertTree.py:
 # Definition for a binary tree node.
@@ -2267,6 +3712,64 @@ root2 = TreeNode(2)
 root2.left = TreeNode(4)
 root2.right = TreeNode(5)
 print(is_subtree(root, root2))
+
+## tree_Symmetric.py:
+'''
+https://leetcode.com/problems/symmetric-tree/description/
+'''
+
+# Definition for a binary tree node.
+class TreeNode:
+    def __init__(self, x):
+        self.val = x
+        self.left = None
+        self.right = None
+
+def isSymmetric(root):
+    def sym(left, right):
+        if not left and not right: 
+            return True
+        if left and right and left.val == right.val:
+            return sym(left.left, right.right) and sym(left.right, right.left)
+        return False
+    return sym(root, root)
+
+'''
+def isTreeSymmetric(t):
+    if not t: return True
+    if not t.left and not t.right:
+        return True
+    elif t.left and t.right:
+        return symmetric(t.left, t.right)
+    else:
+        return False
+
+def symmetric(left, right):
+    if not left and not right:
+        return True
+    elif left and right:
+        if int(left.value) != int(right.value):
+             return False
+        return symmetric(left.left, right.right) or symmetric(left.right, right.left)
+    else:
+        return False
+'''
+
+root = TreeNode(1)
+root.left = TreeNode(2)
+root.right = TreeNode(2)
+root.left.left = TreeNode(3)
+root.left.right = TreeNode(4)
+root.right.left = TreeNode(4)
+root.right.right = TreeNode(3)
+print(isSymmetric(root)) # True 
+
+root = TreeNode(1)
+root.left = TreeNode(2)
+root.right = TreeNode(2)
+root.left.right = TreeNode(3)
+root.right.right = TreeNode(3)
+print(isSymmetric(root)) # False
 
 ## tree_TreeTraversals.py:
 # Definition for a binary tree node.
