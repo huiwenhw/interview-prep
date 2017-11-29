@@ -17,23 +17,21 @@ class MyCalendar:
         :type end: int
         :rtype: bool
         """
-        can_add = True
         if len(self.intervals) == 0:
-            self.intervals.append([start, end-1])
+            self.intervals.append([start, end])
         else:
             for interval in self.intervals:
-                #if interval[1] >= start and end > interval[0]:
-                if not (interval[1] < start or end <= interval[0]):
-                    can_add = False
-            if can_add: self.intervals.append([start, end-1])
-        return can_add 
+                if not (interval[1] <= start or end <= interval[0]):
+                    return False
+            self.intervals.append([start, end])
+        return True 
 
     def book_short(self, start, end):
         for s, e in self.intervals:
             if not (start >= e or end <= s): return False
         self.intervals.append((start, end))
         return True
-        
+
 cal = MyCalendar()
 print(cal.book(10, 20)) # returns true
 print(cal.book(15, 25)) # returns false
