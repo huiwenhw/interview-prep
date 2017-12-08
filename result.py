@@ -77,6 +77,133 @@ s = "2-1+2" # 3
 s = "(1+(4+5+2)-3)+(6+8)" # 23
 s = "  30" # 20
 
+## arr_CalculatorTwo.py:
+'''
+https://leetcode.com/problems/basic-calculator-ii/description/
+
+Implement a basic calculator to evaluate a simple expression string.
+The expression string contains only non-negative integers, +, -, *, / operators and empty spaces . The integer division should truncate toward zero.
+You may assume that the given expression is always valid.
+
+Some examples:
+"3+2*2" = 7
+" 3/2 " = 1
+" 3+5 / 2 " = 5
+
+Note: Do not use the eval built-in library function.
+'''
+import re
+
+# separate all digits, operators into iterable (0, -, 2147483647)
+# iterate through, if its +/-, we add that to the total, update the sign
+# if its */, we calc the term and kiv that
+# if its digit, we update the term
+# at the end, we need to add term*sign, cause the last one will be left out
+def calc_short(s):
+    tokens = iter(re.findall('\d+|\S', s))
+    total, term, sign, num2 = 0, 0, 1, 0
+    for token in tokens:
+        if token in '+-':
+            total += sign * term
+            sign = ' +'.find(token) # 1 if +, -1 if -
+        elif token in '*/':
+            num2 = int(next(tokens))
+            term = term * num2 if token == '*' else int(term/num2)
+        else:
+            term = int(token)
+    return total + term * sign
+
+# if its digit, get all digits
+# if its +-*/, we append that to sign and continue
+# else we pop from sign, if its +-, we add that to total, update prev with +/-
+# if its */, we calc and update prev and kiv
+# at the end, we need to add prev
+def calc(s):
+    s = s.replace(' ', '')
+    i = prev = total = 0
+    sign = ['+']
+    while i < len(s):
+        ch = s[i]
+        print('ch ', ch, ' prev ', prev, ' total ', total)
+        if ch in '+-*/':
+            sign.append(ch)
+            i += 1
+            continue
+        if ch.isdigit():
+            while i+1 < len(s) and s[i+1].isdigit():
+                i += 1
+                ch += s[i]
+        exp = sign.pop()
+        if exp in '+-':
+            total += prev
+            prev = int(ch) * [-1, 1][exp == '+']
+        else:
+            curr = prev * int(ch) if exp == '*' else prev / int(ch)
+            prev = int(curr)
+        i += 1
+    print('ch ', ch, ' prev ', prev, ' total ', total)
+    total += prev
+    return total
+
+# works only for single digit
+def calculate(s):
+    stack = []
+    i = 0
+    while i < len(s):
+        ch = s[i]
+        if ch == '*' or ch == '/':
+            num1 = stack.pop()
+            num2 = s[i+1]
+            i += 1
+            if ch == '*':
+                evl = int(num1) * int(num2)
+            else:
+                evl = int(num1) / int(num2)
+            stack.append(int(evl))
+        else:
+            stack.append(ch)
+        i += 1
+        print(stack)
+
+    while len(stack) > 1:
+        num1 = stack.pop()
+        exp = stack.pop()
+        num2 = stack.pop()
+        if exp == '+':
+            evl = int(num1) + int(num2)
+        else:
+            evl = int(num1) - int(num2)
+        stack.append(int(evl))
+        print(stack)
+    return stack[0] 
+
+print('hi ', calc_short('14-3/2'))
+print(calc_short("0-2147483647")) # -2147483647
+print(calc_short('0*0')) # 0
+print(calc_short('  42 ')) # 42
+print(calc_short('3+2')) # 5
+print(calc_short('3+2*2')) # 7
+print(calc_short('3/2')) # 1 
+print(calc_short('3+5/2')) # 5
+print(calc_short('3+2*2/2+10')) # 14
+
+'''
+print('hi ', calc('14-3/2'))
+print(calc("0-2147483647")) # -2147483647
+print(calc('0*0')) # 0
+print(calc('  42 ')) # 42
+print(calc('3+2')) # 5
+print(calc('3+2*2')) # 7
+print(calc('3/2')) # 1 
+print(calc('3+5/2')) # 5
+print(calc('3+2*2/2+10')) # 14
+
+print(calculate('3+2')) # 5
+print(calculate('3+2*2')) # 7
+print(calculate('3/2')) # 1 
+print(calculate('3+5/2')) # 5
+'''
+
 ## arr_ColumnNum.py:
 '''
 '''
@@ -346,6 +473,56 @@ print(subarray([1,1,2,3,1,4,2,2])) # 5 # deg = 3, subarr = [1,1,2,3,1]
 print(subarray_short([1,2,2,3,1,4,2])) # 6 # deg = 3, subarr = [2,2,3,1,4,2]
 print(subarray_short([1,2,2,3,1])) # 2 # deg = 2, subarr = [2,2]
 print(subarray_short([1,1,2,3,1,4,2,2])) # 5 # deg = 3, subarr = [1,1,2,3,1]
+
+## arr_FindDuplicate.py:
+'''
+https://leetcode.com/problems/find-the-duplicate-number/description/
+
+Given an array nums containing n + 1 integers where each integer is between 1 and n (inclusive), prove that at least one duplicate number must exist. Assume that there is only one duplicate number, find the duplicate one.
+'''
+
+# similar to linkedlist II
+# find where slow and fast meet == cycle means got dup 
+# dist from start to cycle == dist from X to entry point
+# entry point == duplicate number
+def dup_short(nums):
+    slow = nums[0]
+    fast = nums[nums[0]]
+
+    while slow != fast:
+        slow = nums[slow]
+        fast = nums[nums[fast]]
+
+    slow = 0
+    while slow != fast:
+        slow = nums[slow]
+        fast = nums[fast]
+    return slow
+
+# O(n) time and space
+def dup(nums):
+    d = {}
+    for n in nums:
+        d[n] = d.get(n, 0) + 1
+
+    for k,v in d.items():
+        if v > 1:
+            return k
+    return None
+
+# Modifying array
+def dup_shorter(nums):
+    n = len(nums)
+    
+    for i in range(n):
+        nums[abs(nums[i])-1] *= -1
+        if nums[abs(nums[i])-1] > 0:
+            return abs(nums[i])
+    return None
+
+print(dup([1,2,4,5,6,7,8,9,2])) # 2
+print(dup_short([1,2,4,5,6,7,8,9,2])) # 2
+print(dup_shorter([1,2,4,5,6,7,8,9,2])) # 2
 
 ## arr_FindMin.py:
 '''
@@ -966,6 +1143,221 @@ a = [[10,9,6,3,7], [6,10,2,9,7], [7,6,3,8,2], [8,9,7,9,9], [6,8,6,8,2]]
 # expected: [[6,8,7,6,10],[8,9,6,10,9],[6,7,3,2,6],[8,9,8,9,3],[2,9,2,7,7]]
 print(rotate_inplace(a))
 
+## arr_RotateArr.py:
+'''
+https://leetcode.com/problems/rotate-array/description/
+'''
+
+# O(n) space, since slicing creates a new copy of the list 
+# O(1) time...
+def rotate(nums, k):
+    """
+    :type nums: List[int]
+    :type k: int
+    :rtype: void Do not return anything, modify nums in-place instead.
+    """
+    if not nums: return nums
+    k = k % len(nums)
+    nums[:] = nums[-k:] + nums[:-k]
+
+nums = [1,2,3,4,5,6,7]
+rotate(nums, 3)
+print(nums) # [5,6,7,1,2,3,4]
+
+## arr_RotateMatrix.py:
+'''
+You are given an n x n 2D matrix that represents an image. Rotate the image by 90 degrees (clockwise).
+'''
+
+# O(n^2) time and space
+def rotate(a):
+    rows, cols = len(a), len(a[0])
+    res = [[] for _ in range(rows)]
+
+    for i in range(rows):
+        for k in range(cols):
+            res[k].insert(0, a[i][k])
+    return res
+
+# O(n^2) time, in-place: no additional memory
+def rotate_inplace(a):
+    rows, cols = len(a), len(a[0])
+    res = [[0 for _ in range(cols)] for _ in range(rows)]
+
+    matrix(a)
+    for i in range(int(rows/2)):
+        start, end = i, rows-1-i
+        offset = 0
+        for k in range(start, end):
+            print('i ', i, ' k ', k, ' start ', start, ' end ', end)
+            temp = a[start][k]
+
+            a[start][k] = a[end-offset][start]
+            a[end-offset][start] = a[end][end-offset]
+            a[end][end-offset] = a[k][end]
+            a[k][end] = temp
+            matrix(a)
+            offset += 1
+    return a
+
+def matrix(a):
+    for i in range(len(a)):
+        print(a[i])
+    print()
+
+a = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+# expected: [[7, 4, 1], [8, 5, 2], [9, 6, 3]]
+print(rotate_inplace(a))
+a = [[10,9,6,3,7], [6,10,2,9,7], [7,6,3,8,2], [8,9,7,9,9], [6,8,6,8,2]]
+# expected: [[6,8,7,6,10],[8,9,6,10,9],[6,7,3,2,6],[8,9,8,9,3],[2,9,2,7,7]]
+print(rotate_inplace(a))
+
+## arr_SelfDividingNumbers.py:
+'''
+https://leetcode.com/contest/weekly-contest-59/problems/self-dividing-numbers/
+
+A self-dividing number is a number that is divisible by every digit it contains.
+For example, 128 is a self-dividing number because 128 % 1 == 0, 128 % 2 == 0, and 128 % 8 == 0.
+Also, a self-dividing number is not allowed to contain the digit zero.
+Given a lower and upper number bound, output a list of every possible self dividing number, including the bounds if possible.
+'''
+
+def self_dividing_numbers_short(left, right):
+    is_dividing = lambda num: '0' not in str(num) and all(num % int(digit) == 0 for digit in str(num))
+    return list(filter(is_dividing, range(left, right+1)))
+
+def selfDividingNumbers(left, right):
+    ans = []
+    for num in range(left, right+1):
+        strnum = str(num)
+        length = len(strnum)
+        if length == 1:
+            ans.append(num)
+            continue
+        divided = True
+        for i in range(length):
+            if strnum[i] == '0':
+                divided = False
+                break
+            print('num ', num, ' strnum[i] ', strnum[i])
+            if num % int(strnum[i]) != 0:
+                divided = False
+        if divided: ans.append(num)
+    return ans
+
+print(selfDividingNumbers(1, 22)) # [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 15, 22]
+print(self_dividing_numbers_short(1, 22)) # [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 15, 22]
+
+## arr_SetMismatch.py:
+'''
+https://leetcode.com/problems/set-mismatch/description/
+
+The set S contains numbers from 1 to n. One of the numbers in the set got duplicated to another number in the set, which results in repetition of one number and loss of another number.
+
+Your task is to firstly find the number occurs twice and then find the number that is missing. Return them in the form of an array.
+Input: nums = [1,2,2,4]
+Output: [2,3]
+'''
+
+# using xor and array, O(n) time, O(1) space
+# numbers are from [1 ... n], we can xor index with nums[i]
+# that'll leave us with index ^ repeated num
+# when we find repeated num, we can just do index ^ rep ^ rep to get missing index 
+def find_xor(nums):
+    n = len(nums)
+    s = 0
+    for i in range(n):
+        s ^= (i+1) ^ nums[i]
+
+    for i in range(n):
+        nums[abs(nums[i])-1] *= -1
+        if nums[abs(nums[i])-1] > 0:
+            rep = abs(nums[i])
+
+    return [rep, s ^ rep]
+
+# O(n) time, O(1) space
+# using array itself to check for duplicate numbers
+def find_short(nums):
+    n = len(nums)
+    total = int(n*(n+1)/2)
+    ntotal = sum(nums) 
+
+    for i in range(n):
+        nums[abs(nums[i])-1] *= -1
+        if nums[abs(nums[i])-1] > 0:
+            diff = total - (ntotal - abs(nums[i]))
+            return [abs(nums[i]), diff]
+    return None
+
+# O(n) time and space
+def finderrornum(nums):
+    n = len(nums)
+    total = int(n*(n+1)/2)
+
+    d = {}
+    for n in nums:
+        d[n] = d.get(n, 0) + 1
+        if d[n] > 1:
+            diff = total - (sum(nums) - n)
+            return [n, diff]
+            break
+    return None
+
+print(finderrornum([1,2,2,4]))
+print(find_short([1,2,2,4]))
+print(find_short([2,2]))
+print(find_xor([2,2]))
+
+## arr_SingleNumber.py:
+'''
+https://leetcode.com/problems/single-number/description/
+Given an array of integers, every element appears twice except for one. Find that single one.
+Your algorithm should have a linear runtime complexity. Could you implement it without using extra memory?
+'''
+
+# O(n) time, O(1) space
+# ^ is the xor operator in python. 
+# 9 ^ 9 = 0, 9 ^ 5 ^ 9 = 5
+def single_short(nums):
+    res = 0
+    for n in nums:
+        res ^= n
+    return res
+
+# O(n) time and space
+def single_number(nums):
+    d = {}
+    for n in nums:
+        if n not in d:
+            d[n] = 0
+        d[n] += 1
+
+    ans = -1
+    for k,v in d.items():
+        if v == 1:
+            ans = k
+    return ans
+
+nums = [9,3,9,3,9,7,9]
+print(single_number(nums)) # 7
+print(single_short(nums)) # 7
+nums = [17,12,5,-6,12,4,17,-5,2,-3,2,4,5,16,-3,-4,15,15,-4,-5,-6]
+print(single_number(nums)) # 16
+print(single_short(nums)) # 16
+
+## arr_SingleNumber2.py:
+
+def single_number(nums):
+    d = {}
+    for n in nums:
+        d[n] = d.get(n, 0) + 1
+    for k,v in d.items():
+        if v == 1:
+            return k
+
+print(single_number([2,2,2,1]))
+
 ## arr_Sudoku.py:
 '''
 Implement an algorithm that will check whether the given grid of numbers represents a valid Sudoku puzzle according to the layout rules described above. Note that the puzzle represented by grid does not have to be solvable.
@@ -1200,6 +1592,124 @@ def main():
 if __name__ == '__main__':
     main()
 
+## backtrack_NQueens.py:
+'''
+https://leetcode.com/problems/n-queens/description/
+[
+ [".Q..",  // Solution 1
+  "...Q",
+  "Q...",
+  "..Q."],
+
+ ["..Q.",  // Solution 2
+  "Q...",
+  "...Q",
+  ".Q.."]
+]
+Queens can't be on the same row, same col, diagonal 
+'''
+
+# nums = where queens are in cols [1,3] means first queen on col1, sec queen on col3
+# index = current row, path = list 
+def queens_short(n):
+    res = []
+    dfs([-1]*n, 0, [], res)
+    return res
+
+def dfs(nums, index, path, res):
+    if index == len(nums):
+        res.append(path)
+        return 
+    for i in range(len(nums)):
+        nums[index] = i
+        if valid(nums, index):
+            curr_row = '.' * len(nums)
+            dfs(nums, index+1, path + [curr_row[:i] + 'Q' + curr_row[i+1:]], res)
+            
+def valid(nums, index):
+    for i in range(index):
+        if abs(nums[index] - nums[i]) == index - i or nums[i] == nums[index]:
+            return False
+    return True
+
+ans = queens_short(4)
+for i in ans:
+    print(i)
+print()
+
+import copy
+
+# start from every row, proceed onto row+1, col+2 onwards
+# need to wrap col+2 onwards
+# if out of bounds, go back 
+def queens(n):
+    def recur(newl, r, c):
+        # print('start: r ', r, ' c ', c, ' newl ', newl)
+        # checking for same col and diagonals for curr [r][c]
+        for k in range(r-1, -1, -1):
+            if newl[k][c] == 'Q': return None
+        col = c-1
+        for k in range(r-1, -1, -1):
+            # print('check left diag, k: ', k, k, ' newl ', [''.join(x) for x in newl])
+            if col >= 0 and  newl[k][col] == 'Q': return None
+            col -= 1
+        col = c+1
+        for k in range(r-1, -1, -1):
+            # print('check right diag, k: ', k, k, ' newl ', [''.join(x) for x in newl])
+            if col < len(newl) and newl[k][col] == 'Q': return None
+            col += 1
+        newl[r][c] = 'Q'
+        if r == len(newl)-1:
+            return newl
+        # print('r ', r, ' c ', c, ' newl ', newl)
+        for i in range(len(newl)):
+            res = recur(newl, r+1, i)
+            # print('in for r ', r, ' c ', c, ' res ', res)
+            if res is None: newl[r+1][i] = '.'
+            if res is not None:
+                b = copy.deepcopy(newl)
+                ans.append([''.join(x) for x in b])
+                newl[r+1][i] = '.'
+
+    ans = []
+    for i in range(n):
+        newl = [['.' for _ in range(n)] for _ in range(n)]
+        recur(newl, 0, i)
+    return ans
+
+'''
+ans = queens(4)
+for i in ans:
+    print(i)
+print()
+ans = queens(5)
+for i in ans:
+    print(i)
+print()
+'''
+
+## bin_BinaryGap.py:
+'''
+A binary gap within a positive integer N is any maximal sequence of consecutive zeros that is surrounded by ones at both ends in the binary representation of N.
+
+For example, number 9 has binary representation 1001 and contains a binary gap of length 2. The number 529 has binary representation 1000010001 and contains two binary gaps: one of length 4 and one of length 3. The number 20 has binary representation 10100 and contains one binary gap of length 1. The number 15 has binary representation 1111 and has no binary gaps.
+'''
+
+# O(n) time and space, assuming N is max length of binary representation
+def solution(N):
+    bin = "{0:b}".format(N)
+    count, maxn = 0, 0
+    for b in bin:
+        if b == '0':
+            count += 1
+        else:
+            maxn = max(maxn, count)
+            count = 0
+    return maxn
+
+print(solution(9)) # 2
+print(solution(1041)) # 5
+
 ## bin_CountBits.py:
 '''
 https://leetcode.com/problems/counting-bits/description/
@@ -1316,6 +1826,41 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+## data_Segments.py:
+'''
+Given data, event and array of segments, I want to find what's the analytics for a given event based on the segments 
+Given event: 'Signup' and segments: ['city', 'gender', 'origin'], 
+Output: {'Signup': {'NYC': {'M': {'twitter': 1}, 'F': {'google': 2, 'twitter': 1}}, 'Oakland': {'M': {'google': 1}}}}
+'''
+
+def getsegments(data, event, segments):
+    nlist = []
+    for i in range(len(data)):
+        if data[i]['event'] == event:
+            nlist.append(data[i]['properties'])
+
+    # run once
+    d = {event: {}}
+    # run at the start of every loop
+    newd = d[event]
+    for i in range(len(nlist)):
+        for k in range(len(segments)):
+            key = nlist[i][segments[k]]
+            if k == len(segments)-1:
+                if key not in newd:
+                    newd[key] = 0
+                newd[key] += 1
+            else:
+                if key not in newd:
+                    newd[key] = {}
+            newd = newd[key]
+        newd = d[event]
+    d[event] = newd
+    return d
+
+data = [{'properties': {'item_id': 876, 'hair': 'brown', 'gender': 'M', 'city': 'NYC', 'value': 23}, 'event': 'Purchase'}, {'properties': {'hair': 'green', 'gender': 'M', 'city': 'NYC', 'origin': 'twitter'}, 'event': 'Signup'}, {'properties': {'item_id': 876, 'hair': 'blue', 'gender': 'M', 'city': 'SF', 'value': 20}, 'event': 'Purchase'}, {'properties': {'item_id': 123, 'hair': 'red', 'gender': 'F', 'city': 'SF', 'value': 55}, 'event': 'Purchase'}, {'properties': {'hair': 'brown', 'gender': 'F', 'city': 'NYC', 'origin': 'google'}, 'event': 'Signup'}, {'properties': {'hair': 'purple', 'gender': 'F', 'city': 'NYC', 'origin': 'twitter'}, 'event': 'Signup'}, {'properties': {'hair': 'brown', 'gender': 'M', 'city': 'Oakland', 'origin': 'google'}, 'event': 'Signup'}, {'properties': {'hair': 'blond', 'gender': 'F', 'city': 'NYC', 'origin': 'google'}, 'event': 'Signup'}, {'properties': {'item_id': 123, 'hair': 'red', 'gender': 'M', 'city': 'Oakland', 'value': 55}, 'event': 'Purchase'}]
+print(getsegments(data, 'Signup', ['city', 'gender', 'origin']))
 
 ## design_LeastRecentlyUsedCache.py:
 '''
@@ -1434,6 +1979,89 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+## dp_CanJump.py:
+'''
+https://leetcode.com/problems/jump-game/description/
+Given an array of non-negative integers, you are initially positioned at the first index of the array.
+
+Each element in the array represents your maximum jump length at that position.
+Determine if you are able to reach the last index.
+
+For example:
+A = [2,3,1,1,4], return true.
+A = [3,2,1,0,4], return false.
+'''
+
+# O(n) time, O(1) space
+# traverse from the front, track max index we can jump to
+# if curr index is > max index we can jump to, return False
+def canjump_front(nums):
+    m = 0
+    for i, n in enumerate(nums):
+        if i > m:
+            return False
+        m = max(m, i+n)
+    return True
+
+# O(n) time, O(1) space
+# traverse from the back, keeping a need var
+# need var tells us how many steps we need to be able to reach the end
+def canjump_short(nums):
+    if not nums: return False
+    need = 1
+    for i in range(len(nums)-2, -1, -1):
+        if nums[i] >= need:
+            need = 1
+            continue
+        else:
+            need += 1
+    if nums[0] < need-1:
+        return False
+    return True
+
+# O(n^2) time worse, O(n) space
+# for each elem, set a 1 to where it can jump to
+# if end is 0, means cant jump to the end
+def canjump(nums):
+    if not nums: return False
+    n = len(nums)
+    arr = [0 for _ in range(n)]
+    arr[0] = [1,0][nums[0] == 0]
+
+    for i in range(n-1):
+        if arr[i] == 1:
+            if i+1+nums[i] > n-1:
+                return True
+            start, end = i+1, i+1+nums[i]
+            for k in range(start, end):
+                arr[k] = 1
+
+    print(arr)
+    if arr[-1] == 1:
+        return True
+    return False
+
+nums = [2,3,1,1,4]
+print(canjump(nums)) # True
+print(canjump_short(nums)) # True
+print(canjump_front(nums)) # True
+nums = [3,2,1,0,4]
+print(canjump(nums)) # False
+print(canjump_short(nums)) # False
+print(canjump_front(nums)) # False
+nums = [2,0]
+print(canjump(nums)) # True
+print(canjump_short(nums)) # True
+print(canjump_front(nums)) # False
+nums = [0,2,3]
+print(canjump(nums)) # False
+print(canjump_short(nums)) # False
+print(canjump_front(nums)) # False
+nums = [1,2,0,1]
+print(canjump(nums)) # True
+print(canjump_short(nums)) # True
+print(canjump_front(nums)) # True
 
 ## dp_CoinChange.py:
 '''
@@ -2023,9 +2651,10 @@ def wordbreak_readable(s, wordDict):
 
     # dp[i] == True means: I can start my next word from there 
     for i in range(len(s)):
-        for k in range(i, len(s)):
-            if dp[i] and s[i:k+1] in wordDict:
-                dp[k+1] = True
+        if dp[i]:
+            for k in range(i, len(s)):
+                if s[i:k+1] in wordDict:
+                    dp[k+1] = True
     return dp[-1]
 
 print(wordbreak("leetcode", ["leet", "code"])) # True
@@ -2340,6 +2969,91 @@ class Solution(object):
 			
         return Solution.inorder_short(self, root.left) + [root.val] + Solution.inorder_short(self, root.right)
 
+## interval_Calendar.py:
+'''
+https://leetcode.com/contest/weekly-contest-59/problems/my-calendar-i/
+
+Implement a MyCalendar class to store your events. A new event can be added if adding the event will not cause a double booking.
+Your class will have the method, book(int start, int end). Formally, this represents a booking on the half open interval [start, end), the range of real numbers x such that start <= x < end.
+A double booking happens when two events have some non-empty intersection (ie., there is some time that is common to both events.)
+For each call to the method MyCalendar.book, return true if the event can be added to the calendar successfully without causing a double booking. Otherwise, return false and do not add the event to the calendar.
+'''
+
+class MyCalendar:
+    def __init__(self):
+        self.intervals = []
+
+    def book(self, start, end):
+        """
+        :type start: int
+        :type end: int
+        :rtype: bool
+        """
+        if len(self.intervals) == 0:
+            self.intervals.append([start, end])
+        else:
+            for interval in self.intervals:
+                if not (interval[1] <= start or end <= interval[0]):
+                    return False
+            self.intervals.append([start, end])
+        return True 
+
+    def book_short(self, start, end):
+        for s, e in self.intervals:
+            if not (start >= e or end <= s): return False
+        self.intervals.append((start, end))
+        return True
+
+cal = MyCalendar()
+print(cal.book(10, 20)) # returns true
+print(cal.book(15, 25)) # returns false
+print(cal.book(20, 30)) # returns true
+cal2 = MyCalendar()
+print(cal2.book_short(10, 20)) # returns true
+print(cal2.book_short(15, 25)) # returns false
+print(cal2.book_short(20, 30)) # returns true
+
+## interval_CalendarTwo.py:
+'''
+https://leetcode.com/contest/weekly-contest-59/problems/my-calendar-ii/
+
+Implement a MyCalendarTwo class to store your events. A new event can be added if adding the event will not cause a triple booking.
+
+Your class will have one method, book(int start, int end). Formally, this represents a booking on the half open interval [start, end), the range of real numbers x such that start <= x < end.
+
+A triple booking happens when three events have some non-empty intersection (ie., there is some time that is common to all 3 events.)
+
+For each call to the method MyCalendar.book, return true if the event can be added to the calendar successfully without causing a triple booking. Otherwise, return false and do not add the event to the calendar.
+'''
+
+class MyCalendarTwo:
+    def __init__(self):
+        self.intervals = []
+        self.overlaps = []
+
+    def book(self, start, end):
+        """
+        :type start: int
+        :type end: int
+        :rtype: bool
+        """
+        for i, j in self.overlaps:
+            if start < j and end > i:
+                return False
+        for i, j in self.intervals:
+            if start < j and end > i:
+                self.overlaps.append((max(start, i), min(end, j)))
+        self.intervals.append((start, end))
+        return True
+
+cal = MyCalendarTwo()
+print(cal.book(10, 20)) # returns true
+print(cal.book(50, 60)) # returns true
+print(cal.book(10, 40)) # returns true
+print(cal.book(5, 15)) # returns false
+print(cal.book(5, 10)) # returns true
+print(cal.book(25, 55)) # returns true
+
 ## ll_DetectCycle.py:
 '''
 https://leetcode.com/problems/linked-list-cycle/description/
@@ -2413,6 +3127,97 @@ head.next = head
 print(detect_cycle(head))
 print(detect_cycle_s(head))
 print(detect_cycle_short(head))
+
+## ll_DetectCycleTwo.py:
+'''
+https://leetcode.com/problems/linked-list-cycle-ii/description/
+https://discuss.leetcode.com/topic/17521/share-my-python-solution-with-detailed-explanation
+
+Given a linked list, return the node where the cycle begins. If there is no cycle, return null.
+Note: Do not modify the linked list. Can you solve it without using extra space?
+'''
+
+# Definition for singly-linked list.
+class ListNode(object):
+    def __init__(self, x):
+        self.val = x
+        self.next = None
+
+# dist from head to entry point === dist from where slow meets fast to entry point
+# H: dist from head to entry point E
+# D: dist from E to X (where slow meets fast)
+# slow travelled H+D, fast travelled 2(H+D)
+# 2H + 2D = H + D + nLoops -> H = nLoops - D (dist from X to E) 
+# so all we gotta do is to find when head meets slow / fast
+def detect_short(head):
+    loop = None
+    slow = fast = head 
+    while slow and fast and fast.next:
+        slow = slow.next
+        fast = fast.next.next
+
+        if slow is fast: 
+            loop = slow
+            break
+
+    if loop:
+        while slow is not head:
+            slow = slow.next
+            head = head.next
+        return slow
+    return None
+
+# check if there's loop
+# add elements in loop to loopset
+# start from head, check if curr in loopset
+# first element to be in loopset == entry point
+# O(N) time, O(loop) space
+def detectCycle(head):
+    loop = None
+    slow = fast = head 
+    while slow and fast and fast.next:
+        slow = slow.next
+        fast = fast.next.next
+
+        if slow is fast: 
+            loop = slow
+            break
+
+    if loop:
+        curr = loop.next
+        loopset = {loop}
+        while curr is not loop:
+            loopset.add(curr)
+            curr = curr.next
+
+        slow = head
+        while slow not in loopset:
+            slow = slow.next
+        return slow
+    return None
+
+
+head = ListNode(3)
+head.next = ListNode(2)
+head.next.next = ListNode(0)
+head.next.next.next = ListNode(4)
+head.next.next.next.next = head.next
+
+print(detectCycle(head).val) # 2
+print(detect_short(head).val) # 2
+
+head = ListNode(1)
+head.next = head
+
+print(detectCycle(head).val) # 1
+print(detect_short(head).val) # 1
+
+head = ListNode(1)
+head.next = ListNode(2)
+head.next.next = head
+
+print(detectCycle(head).val) # 1
+print(detect_short(head).val) # 1
 
 ## ll_MergeKLists.py:
 '''
@@ -2972,6 +3777,9 @@ if __name__ == '__main__':
 
 ## recur_Subsets.py:
 '''
+https://leetcode.com/problems/subsets/description/
+Given a set of distinct integers, nums, return all possible subsets (the power set).
+Note: The solution set must not contain duplicate subsets.
 '''
 
 # [1,2,3] 
@@ -2999,10 +3807,12 @@ def subsets_short(nums):
     ans = [[]]
     for num in nums:
         ans += [item + [num] for item in ans]
+        print('ans ', ans)
     return ans
 
 print(subsets([1,2,3])) # [[], [1], [2], [2, 1], [3], [3, 1], [3, 2], [3, 2, 1]]
 print(subsets_short([1,2,3])) # [[], [1], [2], [1, 2], [3], [1, 3], [2, 3], [1, 2, 3]]
+print(subsets_short([1,2,2,1])) # [[], [1], [2], [1, 2], [3], [1, 3], [2, 3], [1, 2, 3]]
 
 
 ## recur_SubsetsDuplicate.py:
@@ -3058,6 +3868,95 @@ with open("result.py", "w") as outfile:
             outfile.write(infile.read())
             outfile.write("\n")
 
+## Server.py:
+import unittest
+
+class Server:
+    def __init__(self, lists = {}, ids = []):
+        self.pool = lists
+        self.allocated_ids = ids
+
+    # pool = { 'hosttype': [1,2,3] }
+    def allocate(self, hosttype):
+        if hosttype not in self.pool:
+            self.pool[hosttype] = []
+        curr = self.get_server_id(self.allocated_ids)
+        self.pool[hosttype].append(curr)
+        self.allocated_ids.append(curr)
+        return curr
+
+    def deallocate(self, hostname): # O(n^2)
+        self.allocated_ids.remove(hostname)
+        for k, v in self.pool.items(): # O(n)
+            if hostname in v: # O(n) == could use set
+                self.pool[k].remove(hostname)
+
+    def get_server_id(self, servers):
+        if not servers: return 1
+        servers = sorted(servers) # O(nlogn)
+        minn = 1 
+        for i in range(len(servers)): # O(n)
+            if servers[i] == minn:
+                minn += 1
+            elif servers[i] > minn:
+                return minn
+        if minn == len(servers)+1:
+            return minn
+
+class TestServer(unittest.TestCase):
+    def setUp(self):
+        self.server = Server()
+
+    def test_deallocate_one_hostname(self):
+        self.server = Server({'type': [1]}, [1])
+        self.server.deallocate(1)
+        self.assertEqual(self.server.allocated_ids, [])
+        self.assertEqual(self.server.pool['type'], [])
+
+    def test_allocate_empty_hosttype(self):
+        result = self.server.allocate('api')
+        self.assertEqual(result, 1)
+
+    def test_allocate_nonempty_hosttype(self):
+        self.server = Server({'type': [1,3,4]}, [1,3,4])
+        result = self.server.allocate('type')
+        self.assertEqual(result, 2)
+
+    def test_allocate_multiple_hosttype(self):
+        self.server = Server({'type': [1,3,4]}, [1,3,4])
+        result = self.server.allocate('api')
+        self.assertEqual(result, 2)
+
+    def test_get_empty_list(self):
+        result = self.server.get_server_id([])
+        self.assertEqual(result, 1)
+
+    def test_get_ascending_list(self):
+        result = self.server.get_server_id([1,2,3])
+        self.assertEqual(result, 4)
+
+    def test_get_missing_number_list(self):
+        result = self.server.get_server_id([5,4,2,1])
+        self.assertEqual(result, 3)
+
+    def test_get_not_starting_one(self):
+        result = self.server.get_server_id([4,3])
+        self.assertEqual(result, 1)
+
+# if __name__ == '__main__':
+     # unittest.main()
+
+server = Server()
+server.allocate('type')
+print(server.pool)
+servers = [1,2,4]
+print(server.get_server_id(servers))
+servers = []
+print(server.get_server_id(servers))
+servers = [3,2,1]
+print(server.get_server_id(servers))
+servers = [2,4]
+print(server.get_server_id(servers))
 ## sort_Bubble.py:
 # Swaps elements from 0...sorted index, bringing max to the end each time
 # Best: O(n) sorted arr, Worst: O(n^2), In-place, Stable, Extra O(1)
@@ -3121,20 +4020,443 @@ print(arr, ' original')
 selection(arr)
 print(arr, ' sorted')
 
+## str_IsSubsequence.py:
+'''
+https://leetcode.com/problems/is-subsequence/description/
+Given a string s and a string t, check if s is subsequence of t.
+e.g. s = "abc", t = "ahbgdc"
+Return true.
+'''
+
+# will go through the entire t to check if 'x' exists. it doesn't exist, t comes to the end
+# so StopIteration will be raised and subsequently all c are False
+def is_subseq_short(s, t):
+    t = iter(t)
+    return all(c in t for c in s)
+
+# If curr char is not in t, then we return False
+# Else, we take the substring of t and start from there
+def is_subseq_s(s, t):
+    for c in s:
+        i = t.find(c)
+        if i == -1:
+            return False
+        else:
+            t = t[i+1:]
+    return True
+
+# got TLE
+def is_subseq(s, t):
+    if s == '': return True
+    sets = set()
+    sets.add('')
+    for ch in t:
+        newsets = set()
+        for st in sets:
+            newstr = st + ch
+            newsets.add(newstr)
+        sets.update(newsets)
+    sets.remove('')
+    if s in sets: return True
+    return False
+
+print(is_subseq('abc', 'ahbgdc')) # True
+print(is_subseq('axc', 'ahbgdc')) # False
+print(is_subseq_s('abc', 'ahbgdc')) # True
+print(is_subseq_s('axc', 'ahbgdc')) # False
+print(is_subseq_short('abc', 'ahbgdc')) # True
+print(is_subseq_short('axgd', 'ahbgdc')) # False, will give [T,F,F]
+
+## str_PalindromeSubsequence.py:
+'''
+https://leetcode.com/contest/weekly-contest-59/problems/count-different-palindromic-subsequences/
+'''
+import collections
+
+def palindrome_subseq(S):
+    def is_palindrome(s):
+        mid = int(len(s) / 2)
+        if len(s) % 2 == 1:
+            start = end = mid
+        else: 
+            start, end = mid-1, mid
+        while start >= 0 and end <= len(s)-1:
+            if s[start] != s[end]:
+                return False
+            start -= 1
+            end += 1
+        return True
+
+    def subseq(s):
+        sets = set()
+        sets.add('')
+        for ch in s:
+            newsets = set()
+            for st in sets:
+                newstr = st + ch
+                newsets.add(newstr)
+            sets.update(newsets)
+        sets.remove('')
+        return sets
+        print(sets)
+    sets = subseq(S)
+    ans = 0
+    dp = collections.defaultdict(bool)
+    for st in sets:
+        print(st, dp)
+        if dp[st]:
+            ans += 1
+        else:
+            dp[st] = is_palindrome(st)
+            if dp[st]: ans += 1
+    return ans
+
+
+
+print(palindrome_subseq('abc'))
+print(palindrome_subseq('bccb'))
+print(palindrome_subseq('abcdabcdabcdabcdabcdabcdabcdabcddcbadcbadcbadcbadcbadcbadcbadcba'))
+
+## str_SwapMaximum.py:
+'''
+https://leetcode.com/problems/maximum-swap/description/
+
+Given a non-negative integer, you could swap two digits at most once to get the maximum valued number. Return the maximum valued number you could get.
+
+Example 1:
+Input: 2736
+Output: 7236
+Explanation: Swap the number 2 and the number 7.
+Example 2:
+Inpu t: 9973
+Output: 9973
+Explanation: No swap.
+'''
+
+# break early if a swap happened, cause there wont be other numbers greater
+def maxswap(num):
+    n, newn, newk = str(num), '', 0
+    for i in range(len(n)):
+        maxn = -1
+        for k in range(i+1, len(n)):
+            if int(n[k]) >= maxn:
+                maxn = int(n[k])
+                newk = k
+        if maxn > int(n[i]):
+            newn = n[:i] + n[newk] + n[i+1:newk] + n[i] + n[newk+1:]
+            break
+    newn = int(newn) if newn else num
+    return newn
+
+# swap 
+def max_swap(num):
+    maxn = num
+    n = str(num)
+    for i in range(len(n)):
+        for k in range(i+1, len(n)):
+            newn = n[:i] + n[k] + n[i+1:k] + n[i] + n[k+1:]
+            print('newn ', newn, ' n ', n, ' i ', i, ' k ', k)
+            if int(newn) > maxn:
+                maxn = int(newn)
+    return maxn
+
+print(maxswap(2736)) # 7236
+print(maxswap(9973)) # 9973
+print(maxswap(112)) # 211
+print(maxswap(1012)) # 2011
+print(maxswap(4973)) # 9473
+print(maxswap(4579)) # 9574
+print(maxswap(98368)) # 98863
+print(maxswap(1993)) # 9913
+
+print(max_swap(2736)) # 7236
+print(max_swap(9973)) # 9973
+print(max_swap(112)) # 211
+print(max_swap(1012)) # 2011
+print(max_swap(4973)) # 9473
+print(max_swap(4579)) # 9574
+print(max_swap(98368)) # 98863
+print(max_swap(1993)) # 9913
+
+## Stripe.py:
+# You're running a pool of servers where the servers are numbered sequentially starting from 1. Over time, any given server might explode, in which case its server number is made available for reuse. When a new server is launched, it should be given the lowest available number.
+
+# Write a function which, given the list of currently allocated server numbers, returns the number of the next server to allocate. In addition, you should demonstrate your approach to testing that your function is correct. You may choose to use an existing testing library for your language if you choose, or you may write your own process if you prefer.
+
+# For example, your function should behave something like the following:
+
+#  >> next_server_number([5, 3, 1])
+#  2
+#  >> next_server_number([5, 4, 1, 2])
+#  3
+#  >> next_server_number([3, 2, 1])
+#  4
+#  >> next_server_number([2, 3])
+#  1
+#  >> next_server_number([])
+#  1
+
+# Server names consist of an alphabetic host type (e.g. "apibox") concatenated with the server number, with server numbers allocated as before (so "apibox1", "apibox2", etc. are valid hostnames).
+
+# Write a name tracking class with two operations, allocate(host_type) and deallocate(hostname). The former should reserve and return the next available hostname, while the latter should release that hostname back into the pool.
+
+# For example:
+
+# >> tracker = Tracker()
+# >> tracker.allocate("apibox")
+# "apibox1"
+# >> tracker.allocate("apibox")
+# "apibox2"
+# >> tracker.deallocate("apibox1")
+# nil
+# >> tracker.allocate("apibox")
+# "apibox1"
+# >> tracker.allocate("sitebox")
+# "sitebox1"
+
+# servers { 'hosttype': [list of servers], 'hosttype2': [servers] }
+import re
+import unittest 
+
+def get_next_server(servers):
+    sorted_servers = sorted(servers)
+
+    minn = 1
+    for i in range(len(sorted_servers)):
+        if sorted_servers[i] == minn:
+            minn += 1
+        elif sorted_servers[i] > minn:
+            return minn
+    return minn
+
+class Tracker:
+    def __init__(self):
+        self.servers = {}
+        
+    def allocate(self, hosttype):
+        if hosttype not in self.servers:
+            self.servers[hosttype] = []
+        currid = get_next_server(self.servers[hosttype])
+        self.servers[hosttype].append(currid)
+        return hosttype + str(currid)
+    
+    def deallocate(self, hostname):
+        numindex = re.search('\d', hostname)
+        name = hostname[:numindex.start()]
+        numid = hostname[numindex.start():]
+        self.servers[name].remove(int(numid))   
+        
+class TestTracker(unittest.TestCase):
+    def setUp(self):
+        self.tracker = Tracker()
+    
+    def test_allocate_empty(self):
+        nexthostname = self.tracker.allocate('apibox')
+        self.assertEqual(nexthostname, 'apibox1')
+        nexthostname = self.tracker.allocate('apibox')
+        self.assertEqual(nexthostname, 'apibox2')
+        
+    def test_allocate_nonempty(self):
+        self.tracker.allocate('apibox')
+        self.tracker.allocate('apibox')
+        nexthostname = self.tracker.allocate('sitebox')
+        self.assertEqual(nexthostname, 'sitebox1')
+    
+    def test_deallocate(self):
+        self.tracker.allocate('apibox')
+        self.tracker.allocate('apibox')
+        self.tracker.deallocate("apibox1")
+        self.assertEqual(self.tracker.servers, {'apibox': [2]})
+
+# tracker = Tracker()
+# print(tracker.allocate('apibox'))
+# print(tracker.allocate('apibox'))
+# print(tracker.deallocate('apibox1'))
+# [1,2,3]
+# minn   curr_server
+# 1      1
+# 2      2
+# 3      3
+# 4 
+# [1,2,4]
+# 1      1
+# 2      2
+# 3      4
+# [1,1,2]
+# 3
+# minn curr
+# 1    1
+# 2    1
+# 2    2
+# 3
+
+def get_next_server(servers):
+    sorted_servers = sorted(servers)
+
+    minn = 1
+    for i in range(len(sorted_servers)):
+        if sorted_servers[i] == minn:
+            minn += 1
+        elif sorted_servers[i] > minn:
+            return minn
+    return minn
+
+class TestNextServer(unittest.TestCase):
+    def test_get_emptylist(self):
+        nextid = get_next_server([])
+        self.assertEqual(nextid, 1)
+    
+    def test_get_withgap(self):
+        nextid = get_next_server([5, 4, 1, 2])
+        self.assertEqual(nextid, 3)
+    
+    def test_get_inorder(self):
+        nextid = get_next_server([3, 2, 1])
+        self.assertEqual(nextid, 4)
+    
+    def test_get_withoutone(self):
+        nextid = get_next_server([3, 2])
+        self.assertEqual(nextid, 1)
+    
+if __name__ == '__main__':
+    unittest.main()
+
+## stripe_map.py:
+'''
+Write a map implementation with a get function that lets you retrieve the value of a key at a particular time.
+t:0 A =1
+t:2 A = 2
+get(A, t:1) -> 1
+get(A, t:3) -> 2
+'''
+
+# put all into a list first
+class Time:
+    def __init__(self):
+        self.time = []
+        
+    def get(self, key, time):
+        if time >= len(self.time):
+            return self.time[-1][key]
+        hm = self.time[time]
+        print(self.time[time])
+        if hm:
+            return hm[key]
+        else:
+            return None
+    
+    def set(self, time, key, value):
+        if len(self.time) == time:
+            self.time.append({key: value})
+        elif time < len(self.time):
+            d = self.time[time]
+            d[key] = value
+        else:
+            length = len(self.time)
+            diff = time - length
+            d = self.time[length-1]
+            for i in range(length, length+diff+1):
+                self.time.append(dict(d))
+            d = self.time[time]
+            d[key] = value
+
+t = Time()
+t.set(0, 'A', 1)
+t.set(0, 'B', 1)
+t.set(2, 'A', 2)
+print(t.get('A', 1)) # 1
+print(t.get('A', 3)) # 2
+print(t.get('B', 3)) # 1
+
 ## test.py:
+def check_diag(l):
+    col = 3
+    for k in range(len(l)-1, -1, -1):
+        print(k, col)
+        if col >= 0 and l[k][col] == 'Q':
+            print('Q found')
+        col -= 1
+
+l = ['Q....', '.Q...', '..Q..', '...Q.', '....Q']
+check_diag(l)
+
+def countPalindromicSubsequences(S):
+    N = len(S)
+    A = [ord(c) - ord('a') for c in S]
+    prv = [None] * N
+    nxt = [None] * N
+
+    last = [None] * 4
+    for i in range(N):
+        last[A[i]] = i
+        prv[i] = tuple(last)
+            
+    last = [None] * 4
+    for i in range(N-1, -1, -1):
+        last[A[i]] = i
+        nxt[i] = tuple(last)
+    
+    # print('prev', prv)
+    # print('next ', nxt)
+    MOD = 10**9 + 7
+    memo = [[None] * N for _ in range(N)]
+    def dp(i, j):
+        print('dp ', i, j)
+        if memo[i][j] is not None:
+            return memo[i][j]
+        ans = 1
+        if i <= j:
+            for x in range(4):
+                print('x is ', x)
+                i0 = nxt[i][x]
+                j0 = prv[j][x]
+                if i0 is not None and i <= i0 <= j:
+                    print ('i <= i0 <= j', i, i0, j)
+                    ans += 1
+                if i0 is not None and j0 is not None and i0 < j0:
+                    print ('i0 < j0', i0, j0)
+                    ans += dp(i0+1, j0-1)
+        ans %= MOD
+        memo[i][j] = ans
+        return ans
+    return dp(0, N-1) - 1
+#print(countPalindromicSubsequences('bccb'))
+# print(countPalindromicSubsequences('a'))
+'''
 def test():
     s = "yxyxyxyxyxioio"
     d = {}
     newstr = ''
     vowels = ['a', 'e', 'i', 'o', 'u']
     for ch in s:
-        if ch not in vowels and ch not in newstr:
-            newstr += ch
-        print('ch ', ch, ' newstr ', newstr)
-        d[ch] = True
+    if ch not in vowels and ch not in newstr:
+        newstr += ch
+    print('ch ', ch, ' newstr ', newstr)
+    d[ch] = True
     print(newstr)
-
+∏
 print(test())
+'''
+
+## test_Server.py:
+import Server as Server
+import unittest
+
+class TestServer(unittest.TestCase):
+    def test_get_empty_list(self):
+        result = Server.get_server_id([])
+        self.assertEqual(result, 1)
+
+    def test_get_ascending_list(self):
+        result = Server.get_server_id([1,2,3])
+        self.asertEqual(result, 4)
+
+    def test_get_missing_number_list(self):
+        result = Server.get_server_id([5,4,2,1])
+        self.assertEqual(result, 3)
+
+if __name__ == '__main__':
+    unittest.main()
 
 ## tree_Buildtree.py:
 # Definition for a binary tree node.
@@ -3349,7 +4671,6 @@ def kth_smallest_short(root, k):
             k -= 1
             root = root.right
 
-
 root = TreeNode(4)
 root.left = TreeNode(2)
 root.right = TreeNode(6)
@@ -3518,6 +4839,258 @@ root.left = TreeNode(2)
 root.right = TreeNode(3)
 root.left.left = TreeNode(4)
 root.left.right = TreeNode(5)
+
+print('max path sum')
+print(max_path_sum(root))
+
+## tree_s.py:
+# Definition for a binary tree node.
+class TreeNode(object):
+    def __init__(self, x):
+        self.val = x
+        self.left = None
+        self.right = None
+
+"""
+:type root: TreeNode
+:rtype: List[int]p
+"""
+def inorder(root):
+    if root is None:
+        return []
+    return inorder(root.left) + [root.val] + inorder(root.right)
+
+def inorder_iter(root):
+    if root is None: return []
+    stack, visited = [root], []
+    while stack:
+        root = stack[-1]
+        if root.left:
+            stack.append(root.left)
+            root.left = None # so that it will not add back the same node
+        else:
+            visited.append(stack.pop().val)
+            if root.right:
+                stack.append(root.right)
+                root.right = None 
+    return visited
+
+def inorder_iter_short(root):
+    visited, stack = [], []
+    while stack or root:
+        if root:
+            stack.append(root)
+            root = root.left
+        else:
+            temp = stack.pop()
+            visited.append(temp.val)
+            root = temp.right
+    return visited
+
+def preorder(root):
+    if root is None:
+        return []
+    return [root.val] + preorder(root.left) + preorder(root.right)
+
+def preorder_iter(root):
+    ans, stack = [], []
+    while stack or root:
+        if root:
+            ans.append(root.val)
+            stack.append(root)
+            root = root.left
+        else:
+            temp = stack.pop()
+            root = temp.right
+    return ans
+
+# add root to ans, then add right and left child 
+# always pop left child first
+def preorder_iter_short(root):
+    ans, stack = [], [root]
+    while stack:
+        node = stack.pop()
+        if node:
+            ans.append(node.val)
+            stack.append(node.right)
+            stack.append(node.left)
+    return ans
+
+def postorder(root):
+    if root is None:
+        return []
+    return postorder(root.left) + postorder(root.right) + [root.val]
+
+def postorder_iter(root):
+    ans, stack = [], [(root, False)]
+    while stack:
+        node, visited_twice = stack.pop()
+        if node:
+            if visited_twice:
+                ans.append(node.val)
+            else:
+                stack.append((node, True))
+                stack.append((node.right, False))
+                stack.append((node.left, False))
+    return ans
+                
+def max_depth(root):
+    if root is None:
+        return 0
+    return max(max_depth(root.left), max_depth(root.right)) + 1
+
+def same_tree(p, q):
+    if p is None and q is None:
+        return True
+    elif p is None or q is None:
+        return False
+    return p.val == q.val and same_tree(p.left, q.left) and same_tree(p.right, q.right)
+
+def same_tree_iter(p, q):
+    stack = [(p, q)]
+    while stack:
+        n, m = stack.pop()
+        if n and m:
+            if n.val != m.val:
+                return False
+            stack.append((n.right, m.right))
+            stack.append((n.left, m.left))
+        elif n is not m:
+            return False
+    return True
+
+def same_tree_short(p, q):
+    # checking if both nodes are None
+    if p and q:
+        return p.val == q.val and same_tree(p.left, q.left) and same_tree(p.right, q.right)
+    # checking p == q, but using reference 
+    return p is q
+
+def invert_tree(root):
+    if root is None:
+        return
+
+    root.left, root.right = root.right, root.left 
+
+    invert_tree(root.left)
+    invert_tree(root.right)
+    return root
+
+def invert_tree_short(root):
+    if root:
+        root.left, root.right = invert_tree(root.right), invert_tree(root.left)
+        return root
+
+def level_order(root):
+    index = 0
+    ans, queue = [], [(root, index)]
+    while queue:
+        node, level = queue.pop(0)
+        if node:
+            if len(ans) == level:
+                ans.append([])
+            ans[level] = ans[level] + [node.val]
+            queue.append((node.left, level+1))
+            queue.append((node.right, level+1))
+    return ans
+
+'''
+def max_path_sum(root):
+    ans, stack = [], [(root, None, False)]
+    c1, c2, curr, maxsum, curr_parent = 0, 0, 0, 0, None
+    while stack:
+        node, parent, visited_twice = stack.pop()
+        if node: 
+            print('node ', node.val, ' visited_twice ', visited_twice)
+            print('c1 ', c1, ' c2 ', c2, ' maxsum ', maxsum)
+            if parent is None and visited_twice:
+                maxsum = max(maxsum, node.val + c1 + c2)
+            elif visited_twice:
+                if c1 is None and c2 is None:
+                    curr_parent = parent
+                elif parent == curr_parent:
+                    if c1 is None:
+                        c1 = node.val
+                    elif c2 is None:
+                        c2 = node.val
+                else:
+                    curr_parent = parent
+                    maxsum = max(node.val + c1 + c2, maxsum)
+                    c1 = max(node.val + c1, node.val + c2)
+                    c2 = 0
+                print('in visited node ', node.val, ' parent ', parent.val , ' visited_twice ', visited_twice)
+                print('in visited c1 ', c1, ' c2 ', c2, ' maxsum ', maxsum, ' currparent ', curr_parent.val)
+            else:
+                stack.append((node, parent, True))
+                stack.append((node.right, node, False))
+                stack.append((node.left, node, False))
+    return maxsum
+'''
+
+# want to compare right and left, return max 
+# keep maxsum check at each node 
+# dfs returns both
+def max_path_sum(root):
+    def dfs(node):
+        left = right = 0
+        leftsum = rightsum = float('-inf')
+        if node.left:
+            left, leftsum = dfs(node.left)
+            left = max(left, 0)
+        if node.right:
+            right, rightsum = dfs(node.right)
+            right = max(right, 0)
+        return node.val + max(left, right), max(node.val + left + right, leftsum, rightsum)
+    if root:
+        return dfs(root)[1]
+    return 0
+
+
+root = TreeNode(1)
+root.left = TreeNode(2)
+root.right = TreeNode(3)
+root.left.left = TreeNode(4)
+root.left.right = TreeNode(5)
+
+print('inorder')
+print(inorder(root))
+print(inorder_iter(root))
+
+root = TreeNode(1)
+root.left = TreeNode(2)
+root.right = TreeNode(3)
+root.left.left = TreeNode(4)
+root.left.right = TreeNode(5)
+
+print(inorder_iter_short(root))
+
+print('preorder')
+print(preorder(root))
+print(preorder_iter(root))
+print(preorder_iter_short(root))
+
+print('postorder')
+print(postorder(root))
+print(postorder_iter(root))
+
+print('max depth of tree: ', max_depth(root))
+
+print('same tree')
+print(same_tree(root, root))
+print(same_tree_iter(root, root))
+print(same_tree_short(root, root))
+
+print('invert tree, preorder')
+print(preorder(invert_tree(root)))
+root = TreeNode(1)
+root.left = TreeNode(2)
+root.right = TreeNode(3)
+root.left.left = TreeNode(4)
+root.left.right = TreeNode(5)
+print(preorder(invert_tree_short(root)))
+
+print('level order')
+print(level_order(root))
 
 print('max path sum')
 print(max_path_sum(root))
@@ -3783,6 +5356,7 @@ class TreeNode(object):
 :type root: TreeNode
 :rtype: List[int]p
 """
+# left, root, right
 def inorder(root):
     if root is None:
         return []
@@ -3815,6 +5389,7 @@ def inorder_iter_short(root):
             root = temp.right
     return visited
 
+# root, left, right
 def preorder(root):
     if root is None:
         return []
@@ -3835,15 +5410,16 @@ def preorder_iter(root):
 # add root to ans, then add right and left child 
 # always pop left child first
 def preorder_iter_short(root):
-    ans, stack = [], [root]
-    while stack:
-        node = stack.pop()
-        if node:
-            ans.append(node.val)
-            stack.append(node.right)
-            stack.append(node.left)
+    ans, stack = [], []
+    while root or stack:
+        if root:
+            ans.append(root.val)
+            stack.append(root.right)
+            stack.append(root.left)
+        root = stack.pop()
     return ans
 
+# left, right, root
 def postorder(root):
     if root is None:
         return []
@@ -3861,6 +5437,17 @@ def postorder_iter(root):
                 stack.append((node.right, False))
                 stack.append((node.left, False))
     return ans
+
+# reverse of root, right, left 
+def postorder_iter_short(root):
+    ans, stack = [], []
+    while root or stack:
+        if root:
+            ans.append(root.val)
+            stack.append(root.left)
+            stack.append(root.right)
+        root = stack.pop()
+    return ans[::-1]
 
 root = TreeNode(1)
 root.left = TreeNode(2)
@@ -3888,6 +5475,7 @@ print(preorder_iter_short(root))
 print('postorder')
 print(postorder(root))
 print(postorder_iter(root))
+print(postorder_iter_short(root))
 
 ## tree_ValidBST.py:
 # Definition for a binary tree node.
@@ -3931,256 +5519,4 @@ root.right.right = TreeNode(20)
 
 print('is valid bst: ', is_valid_bst(root))
 print('is valid bst: ', is_valid_short(root))
-
-## trees.py:
-# Definition for a binary tree node.
-class TreeNode(object):
-    def __init__(self, x):
-        self.val = x
-        self.left = None
-        self.right = None
-
-"""
-:type root: TreeNode
-:rtype: List[int]p
-"""
-def inorder(root):
-    if root is None:
-        return []
-    return inorder(root.left) + [root.val] + inorder(root.right)
-
-def inorder_iter(root):
-    if root is None: return []
-    stack, visited = [root], []
-    while stack:
-        root = stack[-1]
-        if root.left:
-            stack.append(root.left)
-            root.left = None # so that it will not add back the same node
-        else:
-            visited.append(stack.pop().val)
-            if root.right:
-                stack.append(root.right)
-                root.right = None 
-    return visited
-
-def inorder_iter_short(root):
-    visited, stack = [], []
-    while stack or root:
-        if root:
-            stack.append(root)
-            root = root.left
-        else:
-            temp = stack.pop()
-            visited.append(temp.val)
-            root = temp.right
-    return visited
-
-def preorder(root):
-    if root is None:
-        return []
-    return [root.val] + preorder(root.left) + preorder(root.right)
-
-def preorder_iter(root):
-    ans, stack = [], []
-    while stack or root:
-        if root:
-            ans.append(root.val)
-            stack.append(root)
-            root = root.left
-        else:
-            temp = stack.pop()
-            root = temp.right
-    return ans
-
-# add root to ans, then add right and left child 
-# always pop left child first
-def preorder_iter_short(root):
-    ans, stack = [], [root]
-    while stack:
-        node = stack.pop()
-        if node:
-            ans.append(node.val)
-            stack.append(node.right)
-            stack.append(node.left)
-    return ans
-
-def postorder(root):
-    if root is None:
-        return []
-    return postorder(root.left) + postorder(root.right) + [root.val]
-
-def postorder_iter(root):
-    ans, stack = [], [(root, False)]
-    while stack:
-        node, visited_twice = stack.pop()
-        if node:
-            if visited_twice:
-                ans.append(node.val)
-            else:
-                stack.append((node, True))
-                stack.append((node.right, False))
-                stack.append((node.left, False))
-    return ans
-                
-def max_depth(root):
-    if root is None:
-        return 0
-    return max(max_depth(root.left), max_depth(root.right)) + 1
-
-def same_tree(p, q):
-    if p is None and q is None:
-        return True
-    elif p is None or q is None:
-        return False
-    return p.val == q.val and same_tree(p.left, q.left) and same_tree(p.right, q.right)
-
-def same_tree_iter(p, q):
-    stack = [(p, q)]
-    while stack:
-        n, m = stack.pop()
-        if n and m:
-            if n.val != m.val:
-                return False
-            stack.append((n.right, m.right))
-            stack.append((n.left, m.left))
-        elif n is not m:
-            return False
-    return True
-
-def same_tree_short(p, q):
-    # checking if both nodes are None
-    if p and q:
-        return p.val == q.val and same_tree(p.left, q.left) and same_tree(p.right, q.right)
-    # checking p == q, but using reference 
-    return p is q
-
-def invert_tree(root):
-    if root is None:
-        return
-
-    root.left, root.right = root.right, root.left 
-
-    invert_tree(root.left)
-    invert_tree(root.right)
-    return root
-
-def invert_tree_short(root):
-    if root:
-        root.left, root.right = invert_tree(root.right), invert_tree(root.left)
-        return root
-
-def level_order(root):
-    index = 0
-    ans, queue = [], [(root, index)]
-    while queue:
-        node, level = queue.pop(0)
-        if node:
-            if len(ans) == level:
-                ans.append([])
-            ans[level] = ans[level] + [node.val]
-            queue.append((node.left, level+1))
-            queue.append((node.right, level+1))
-    return ans
-
-'''
-def max_path_sum(root):
-    ans, stack = [], [(root, None, False)]
-    c1, c2, curr, maxsum, curr_parent = 0, 0, 0, 0, None
-    while stack:
-        node, parent, visited_twice = stack.pop()
-        if node: 
-            print('node ', node.val, ' visited_twice ', visited_twice)
-            print('c1 ', c1, ' c2 ', c2, ' maxsum ', maxsum)
-            if parent is None and visited_twice:
-                maxsum = max(maxsum, node.val + c1 + c2)
-            elif visited_twice:
-                if c1 is None and c2 is None:
-                    curr_parent = parent
-                elif parent == curr_parent:
-                    if c1 is None:
-                        c1 = node.val
-                    elif c2 is None:
-                        c2 = node.val
-                else:
-                    curr_parent = parent
-                    maxsum = max(node.val + c1 + c2, maxsum)
-                    c1 = max(node.val + c1, node.val + c2)
-                    c2 = 0
-                print('in visited node ', node.val, ' parent ', parent.val , ' visited_twice ', visited_twice)
-                print('in visited c1 ', c1, ' c2 ', c2, ' maxsum ', maxsum, ' currparent ', curr_parent.val)
-            else:
-                stack.append((node, parent, True))
-                stack.append((node.right, node, False))
-                stack.append((node.left, node, False))
-    return maxsum
-'''
-
-# want to compare right and left, return max 
-# keep maxsum check at each node 
-# dfs returns both
-def max_path_sum(root):
-    def dfs(node):
-        left = right = 0
-        leftsum = rightsum = float('-inf')
-        if node.left:
-            left, leftsum = dfs(node.left)
-            left = max(left, 0)
-        if node.right:
-            right, rightsum = dfs(node.right)
-            right = max(right, 0)
-        return node.val + max(left, right), max(node.val + left + right, leftsum, rightsum)
-    if root:
-        return dfs(root)[1]
-    return 0
-
-
-root = TreeNode(1)
-root.left = TreeNode(2)
-root.right = TreeNode(3)
-root.left.left = TreeNode(4)
-root.left.right = TreeNode(5)
-
-print('inorder')
-print(inorder(root))
-print(inorder_iter(root))
-
-root = TreeNode(1)
-root.left = TreeNode(2)
-root.right = TreeNode(3)
-root.left.left = TreeNode(4)
-root.left.right = TreeNode(5)
-
-print(inorder_iter_short(root))
-
-print('preorder')
-print(preorder(root))
-print(preorder_iter(root))
-print(preorder_iter_short(root))
-
-print('postorder')
-print(postorder(root))
-print(postorder_iter(root))
-
-print('max depth of tree: ', max_depth(root))
-
-print('same tree')
-print(same_tree(root, root))
-print(same_tree_iter(root, root))
-print(same_tree_short(root, root))
-
-print('invert tree, preorder')
-print(preorder(invert_tree(root)))
-root = TreeNode(1)
-root.left = TreeNode(2)
-root.right = TreeNode(3)
-root.left.left = TreeNode(4)
-root.left.right = TreeNode(5)
-print(preorder(invert_tree_short(root)))
-
-print('level order')
-print(level_order(root))
-
-print('max path sum')
-print(max_path_sum(root))
 
