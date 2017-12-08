@@ -48,7 +48,6 @@ def kth_smallest_short(root, k):
             k -= 1
             root = root.right
 
-
 root = TreeNode(4)
 root.left = TreeNode(2)
 root.right = TreeNode(6)

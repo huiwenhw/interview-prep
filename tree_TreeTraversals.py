@@ -9,6 +9,7 @@ class TreeNode(object):
 :type root: TreeNode
 :rtype: List[int]p
 """
+# left, root, right
 def inorder(root):
     if root is None:
         return []
@@ -41,6 +42,7 @@ def inorder_iter_short(root):
             root = temp.right
     return visited
 
+# root, left, right
 def preorder(root):
     if root is None:
         return []
@@ -61,15 +63,16 @@ def preorder_iter(root):
 # add root to ans, then add right and left child 
 # always pop left child first
 def preorder_iter_short(root):
-    ans, stack = [], [root]
-    while stack:
-        node = stack.pop()
-        if node:
-            ans.append(node.val)
-            stack.append(node.right)
-            stack.append(node.left)
+    ans, stack = [], []
+    while root or stack:
+        if root:
+            ans.append(root.val)
+            stack.append(root.right)
+            stack.append(root.left)
+        root = stack.pop()
     return ans
 
+# left, right, root
 def postorder(root):
     if root is None:
         return []
@@ -87,6 +90,17 @@ def postorder_iter(root):
                 stack.append((node.right, False))
                 stack.append((node.left, False))
     return ans
+
+# reverse of root, right, left 
+def postorder_iter_short(root):
+    ans, stack = [], []
+    while root or stack:
+        if root:
+            ans.append(root.val)
+            stack.append(root.left)
+            stack.append(root.right)
+        root = stack.pop()
+    return ans[::-1]
 
 root = TreeNode(1)
 root.left = TreeNode(2)
@@ -114,3 +128,4 @@ print(preorder_iter_short(root))
 print('postorder')
 print(postorder(root))
 print(postorder_iter(root))
+print(postorder_iter_short(root))

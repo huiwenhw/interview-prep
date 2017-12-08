@@ -23,9 +23,10 @@ def wordbreak_readable(s, wordDict):
 
     # dp[i] == True means: I can start my next word from there 
     for i in range(len(s)):
-        for k in range(i, len(s)):
-            if dp[i] and s[i:k+1] in wordDict:
-                dp[k+1] = True
+        if dp[i]:
+            for k in range(i, len(s)):
+                if s[i:k+1] in wordDict:
+                    dp[k+1] = True
     return dp[-1]
 
 print(wordbreak("leetcode", ["leet", "code"])) # True
