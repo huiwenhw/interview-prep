@@ -5,19 +5,22 @@ Write a solution that only iterates over the string once and uses O(1) additiona
 
 # O(n) time and space
 def first(s):
-    if not s: return '_'
     d = {}
     for i in range(len(s)):
-        ch = s[i]
-        if ch not in d:
-            d[ch] = [0, i]
-        d[ch] = [d[ch][0]+1, i]
-    index, key = float('inf'), ''
-    for k, v in d.items():
-        if v[0] == 1 and v[1] < index:
-            index = v[1]
-            key = k
-    return [key, '_'][index == float('inf')]
+        d[s[i]] = d.get(s[i], [0, i])
+        d[s[i]][0] += 1
+    min_i = float('inf')
+    for k,v in d.items():
+        if v[0] == 1 and v[1] < min_i:
+            min_i = v[1]
+    return [min_i, -1][min_i == float('inf')]
 
+def first_short(s):
+    letters = 'abcdefghijklmnopqrstuvwyz'
+    min_i = float('inf')
+    for i in range(len(s)):
+        if s.count(s[i]) == 1 and i < min_i:
+            min_i = i
+    return [min_i, -1][min_i == float('inf')]
 print(first("abacabad")) # c
 print(first("abacabaabacaba")) # '_'

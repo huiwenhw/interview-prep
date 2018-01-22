@@ -5,6 +5,16 @@ class TreeNode(object):
         self.left = None
         self.right = None
 
+def is_valid_short(root):
+	return isValid(root, float('inf'), float('-inf'))
+
+# not <= cause cant children must be < or > parent
+def isValid(root, maxn, minn):
+    if not root: return True
+    if not (minn < root.val and root.val < maxn):
+        return False
+    return isValid(root.left, min(maxn, root.val), minn) and isValid(root.right, maxn, max(minn, root.val))
+
 def is_valid_bst(root):
     def is_valid(node):
         if node is None:
@@ -22,20 +32,17 @@ def is_valid_bst(root):
         return (node, min(lmin, rmin), max(lmax, rmax), lbool == rbool)
     return is_valid(root)[3]
 
-def is_valid_short(root):
-    def is_valid(node, nmin, nmax):
-        if not node:
-            return True
-        if node.val >= nmin or node.val <= nmax:
-            return False
-        return is_valid(node.left, min(nmin, node.val), nmax) and is_valid(node.right, nmin, max(nmax, node.val))
-    return is_valid(root, float('inf'), float('-inf'))
-
 root = TreeNode(10)
 root.left = TreeNode(5)
 root.right = TreeNode(15)
 root.right.left = TreeNode(6)
 root.right.right = TreeNode(20)
 
-print('is valid bst: ', is_valid_bst(root))
-print('is valid bst: ', is_valid_short(root))
+print('is valid bst: ', is_valid_bst(root)) # False
+print('is valid bst: ', is_valid_short(root)) # False
+
+root = TreeNode(1)
+root.left = TreeNode(1)
+
+print('is valid bst: ', is_valid_bst(root)) # False
+print('is valid bst: ', is_valid_short(root)) # False

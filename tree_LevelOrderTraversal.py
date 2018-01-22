@@ -1,3 +1,7 @@
+'''
+https://leetcode.com/problems/binary-tree-level-order-traversal/
+'''
+
 # Definition for a binary tree node.
 class TreeNode(object):
     def __init__(self, x):
@@ -5,17 +9,32 @@ class TreeNode(object):
         self.left = None
         self.right = None
 
-def level_order(root):
-    index = 0
-    ans, queue = [], [(root, index)]
+# adding by level 
+def level_withoutlevel(root):
+    if not root: return []
+    ans, queue = [], [root]
     while queue:
-        node, level = queue.pop(0)
-        if node:
-            if len(ans) == level:
-                ans.append([])
-            ans[level] = ans[level] + [node.val]
-            queue.append((node.left, level+1))
-            queue.append((node.right, level+1))
+        level = []
+        num = len(queue)
+        for i in range(num):
+            node = queue.pop(0)
+            level.append(node.val)
+            if node.left: queue.append(node.left)
+            if node.right: queue.append(node.right)
+        ans.append(level)
+    return ans
+            
+
+# adding per node
+def level(root):
+    if not root: return []
+    ans, queue = [], [(root, 0)]
+    while queue:
+        curr, level = queue.pop(0)
+        if len(ans) == level: ans.append([])
+        ans[level].append(curr.val)
+        if curr.left: queue.append((curr.left, level+1))
+        if curr.right: queue.append((curr.right, level+1))
     return ans
 
 root = TreeNode(1)
@@ -25,4 +44,5 @@ root.left.left = TreeNode(4)
 root.left.right = TreeNode(5)
 
 print('level order')
-print(level_order(root))
+print(level(root))
+print(level_withoutlevel(root))

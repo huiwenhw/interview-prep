@@ -2,34 +2,35 @@
 https://leetcode.com/problems/lru-cache/description/
 '''
 
+# get: if key not in dict, return -1 
+#      if key is in dict, get index, slice to append at the back
+# put: if key is in dict, simply change value
+#      if len(cache) same as capacity, remove LRU from cache
+#      add new key, value to dict and cache 
 class LRUCache(object):
     def __init__(self, capacity):
        self.capacity = capacity
        self.d = {}
-       self.index = 0
        self.lrulist = []
 
-    def get(self, key):
+    def get(self, key):         # O(n) cause of slicing
         if key not in self.d:
             return -1
         i = self.lrulist.index(key)
         self.lrulist = self.lrulist[:i] + self.lrulist[i+1:] + [key]
         return self.d.get(key)
 
-    def put(self, key, value):
+    def put(self, key, value):# O(n) cause of slicing
         if key in self.d:
             self.d[key] = value
             i = self.lrulist.index(key)
             self.lrulist = self.lrulist[:i] + self.lrulist[i+1:] + [key]
-        elif self.index == self.capacity:
-            self.d.pop(self.lrulist[0], None)
-            self.lrulist = self.lrulist[1:]
-            self.d[key] = value
-            self.lrulist.append(key)
         else:
+            if len(self.lrulist) == self.capacity:
+                self.d.pop(self.lrulist[0], None)
+                self.lrulist = self.lrulist[1:]
             self.d[key] = value
             self.lrulist.append(key)
-            self.index += 1
 
 # Using doubly linked list to provide O(1) get / put
 class Node:
@@ -39,13 +40,19 @@ class Node:
         self.prev = None
         self.next = None
 
-class LRUCache(object):
+# dict: {key: node}
+# get: if key not in dict, return -1 
+#      if key in dict, remove node, add node to before tail, return val
+# put: if key in dict, remove node
+#      if capacity is up, remove head.next, remove from dict
+#      then create and add node to tail.prev and to dict
+class LRUCacheTwo(object):
     def __init__(self, capacity):
         self.capacity = capacity
         self.d = {}
         self.head = Node(0, 0)
         self.tail = Node(0, 0)
-        self.head.head = self.tail 
+        self.head.next = self.tail 
         self.tail.prev = self.head 
 
     def get(self, key):
@@ -59,13 +66,13 @@ class LRUCache(object):
     def put(self, key, value):
         if key in self.d:
             self.remove(self.d[key])
-        n = Node(key, value)
-        self.d[key] = n
-        self.add(n)
-        if len(self.d) > self.capacity:
+        elif len(self.d) == self.capacity:
             n = self.head.next
             self.remove(n)
             self.d.pop(n.key, None)
+        n = Node(key, value)
+        self.d[key] = n
+        self.add(n)
 
     def remove(self, node):
         p = node.prev
@@ -81,7 +88,7 @@ class LRUCache(object):
         node.next = self.tail
 
 def main():
-    obj = LRUCache(2)
+    obj = LRUCacheTwo(2)
     obj.put(1,1)
     obj.put(2,2)
     print(obj.get(1)) # 1
@@ -93,7 +100,7 @@ def main():
     print(obj.get(4)) # 4
     # print(obj.d, obj.lrulist)
 
-    obj = LRUCache(2)
+    obj = LRUCacheTwo(2)
     print(obj.get(2)) # -1 
     obj.put(2, 6)
     print(obj.get(1)) # -1 
@@ -103,7 +110,7 @@ def main():
     print(obj.get(2)) # 6
     # print(obj.d, obj.lrulist)
 
-    obj = LRUCache(2)
+    obj = LRUCacheTwo(2)
     obj.put(2,1)
     obj.put(1,1)
     obj.put(2,3)
