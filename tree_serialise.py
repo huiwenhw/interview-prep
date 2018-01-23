@@ -1,3 +1,5 @@
+import collections 
+
 # Definition for a binary tree node.
 class TreeNode(object):
     def __init__(self, x):
@@ -5,20 +7,40 @@ class TreeNode(object):
         self.left = None
         self.right = None
 
+# 1 2 # # 3 4 # # 5 # # 
 def serialise(root):
-    def doit(node):
+    def ser(node):
         if node:
             vals.append(str(node.val))
-            doit(node.left)
-            doit(node.right)
+            ser(node.left)
+            ser(node.right)
         else:
             vals.append('#')
     vals = []
-    doit(root)
-    print(' '.join(vals))
+    ser(root)
     return ' '.join(vals)
 
+# Changed to not use pop(0) as it is O(n)
+# deque makes popleft O(1)
 def deserialise(data):
+    if not data: return
+    def deser(vals):
+        if len(vals) == 0: return
+        # val = vals.pop(0) # so that we will go through the array in order
+        val = vals.popleft()
+        print(val, vals)
+        if val == '#':
+            return None
+        node = TreeNode(int(val))
+        node.left = deser(vals)
+        node.right = deser(vals)
+        return node
+             
+    # vals = data.split()
+    vals = collections.deque(data.split())
+    return deser(vals)
+
+def deserialise_withiter(data):
     def doit():
         val = next(vals)
         print('val ', val, ' vals ', vals)
@@ -98,10 +120,12 @@ def level_order(root):
 root = TreeNode(1)
 root.left = TreeNode(2)
 root.right = TreeNode(3)
-root.left.left = TreeNode(4)
-root.left.right = TreeNode(5)
+root.right.left = TreeNode(4)
+root.right.right = TreeNode(5)
 
-ans = deserialise(serialise(root))
+data = serialise(root)
+print('data ', data)
+ans = deserialise(data)
 print(level_order(ans))
 
 '''

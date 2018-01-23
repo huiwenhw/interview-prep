@@ -11,6 +11,20 @@ class TreeNode(object):
         self.left = None
         self.right = None
 
+# use inorder and check! 
+def kth_smallest_short(root, k):
+    stack = []
+    while stack or root:
+        if root:
+            stack.append(root)
+            root = root.left
+        else:
+            root = stack.pop()
+            if k == 1:
+                return root.val
+            k -= 1
+            root = root.right
+
 # check left children. if found, return left immediately 
 # else, left child returned, add 1 to count and check == k
 # check right children. if found, return immediately
@@ -33,20 +47,6 @@ def kth_smallest(root, k):
             return (rnode, count, True)
         return (node, count, found)
     return kth(root, k, 0, False)[0].val
-
-# or just use inorder and check! 
-def kth_smallest_short(root, k):
-    stack = []
-    while stack or root:
-        if root:
-            stack.append(root)
-            root = root.left
-        else:
-            root = stack.pop()
-            if k == 1:
-                return root.val
-            k -= 1
-            root = root.right
 
 root = TreeNode(4)
 root.left = TreeNode(2)
