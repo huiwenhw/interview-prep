@@ -474,6 +474,23 @@ print(subarray_short([1,2,2,3,1,4,2])) # 6 # deg = 3, subarr = [2,2,3,1,4,2]
 print(subarray_short([1,2,2,3,1])) # 2 # deg = 2, subarr = [2,2]
 print(subarray_short([1,1,2,3,1,4,2,2])) # 5 # deg = 3, subarr = [1,1,2,3,1]
 
+## arr_DiagonalSame.py:
+'''
+https://leetcode.com/contest/weekly-contest-68/problems/toeplitz-matrix/
+'''
+
+def matrix(matrix):
+    for i in range(0, len(matrix)-1):
+        length = len(matrix[i])
+        arr = matrix[i]
+        arr_sec = matrix[i+1]
+        print(arr[:length-1], arr_sec[1:])
+        if not arr[:length-1] == arr_sec[1:]:
+            return False
+    return True
+
+print(matrix([[1,2,3,4],[5,1,2,3],[9,5,1,2]]))
+
 ## arr_FindDuplicate.py:
 '''
 https://leetcode.com/problems/find-the-duplicate-number/description/
@@ -657,22 +674,50 @@ Write a solution that only iterates over the string once and uses O(1) additiona
 
 # O(n) time and space
 def first(s):
-    if not s: return '_'
     d = {}
     for i in range(len(s)):
-        ch = s[i]
-        if ch not in d:
-            d[ch] = [0, i]
-        d[ch] = [d[ch][0]+1, i]
-    index, key = float('inf'), ''
-    for k, v in d.items():
-        if v[0] == 1 and v[1] < index:
-            index = v[1]
-            key = k
-    return [key, '_'][index == float('inf')]
+        d[s[i]] = d.get(s[i], [0, i])
+        d[s[i]][0] += 1
+    min_i = float('inf')
+    for k,v in d.items():
+        if v[0] == 1 and v[1] < min_i:
+            min_i = v[1]
+    return [min_i, -1][min_i == float('inf')]
 
+def first_short(s):
+    letters = 'abcdefghijklmnopqrstuvwyz'
+    min_i = float('inf')
+    for i in range(len(s)):
+        if s.count(s[i]) == 1 and i < min_i:
+            min_i = i
+    return [min_i, -1][min_i == float('inf')]
 print(first("abacabad")) # c
 print(first("abacabaabacaba")) # '_'
+
+## arr_GroupAnagrams.py:
+'''
+https://leetcode.com/problems/group-anagrams/description/
+Given an array of strings, group anagrams together.
+'''
+
+def groupAnagrams(strs):
+    """
+    :type strs: List[str]
+    :rtype: List[List[str]]
+    """
+    d = {}
+    for s in strs:
+        sorteds = ''.join(sorted(s))
+        d[sorteds] = d.get(sorteds, []) + [s]
+
+    ans = []
+    for key, value in d.items():
+        ans.append(value)
+    print(d.values())
+    return ans
+
+print(groupAnagrams(["eat", "tea", "tan", "ate", "nat", "bat"]))
+# [["ate", "eat","tea"], ["nat","tan"], ["bat"]]
 
 ## arr_LargestRectangleArea.py:
 '''
@@ -755,6 +800,50 @@ heights = [5,5,1,7,1,1,5,2,7,6]
 print(area_short(heights))
 #print(area(heights)) # 12
 '''
+
+## arr_LetterCombinations.py:
+'''
+https://leetcode.com/problems/letter-combinations-of-a-phone-number/description/
+Given a digit string, return all possible letter combinations that the number could represent.
+'''
+
+def letter(digits):
+    if not digits: return []
+    mapping = {'2': ['a','b','c'], '3': ['d','e','f'], '4': ['g','h','i'], '5': ['j','k','l'], '6': ['m','n','o'], '7': ['p','q','r','s'], '8': ['t','u','v'], '9': ['w','x','y','z']}
+    
+    return recur(digits, mapping)
+
+def recur(digits, mapping):
+    if len(digits) == 1: return mapping[digits[0]]
+
+    first = digits[0]
+    for i in range(1, len(digits)):
+        arr = recur(digits[1:], mapping)
+        firststr = mapping[first]
+        newarr = []
+        for char in firststr:
+            newarr += [char+x for x in arr]
+        return newarr
+
+print(letter("")) # []
+print(letter("23")) # ['ad', 'ae', 'af', 'bd', 'be', 'bf', 'cd', 'ce', 'cf']
+
+def letter_nonrecur(digits):
+    if not digits: return []
+    mapping = {"2":"abc" , "3":"def" , "4":"ghi" , "5":"jkl" , "6":"mno" , "7":"pqrs" , "8":"tuv" , "9":"wxyz"}
+
+    ans = [""]
+    for digit in digits:
+        word = mapping[digit]
+        temp = []
+        for char in word:
+            for newchar in ans:
+                temp += [newchar + char]
+        ans = temp
+    return ans
+
+print(letter_nonrecur("")) # []
+print(letter_nonrecur("23")) # ['ad', 'ae', 'af', 'bd', 'be', 'bf', 'cd', 'ce', 'cf']
 
 ## arr_LongestConsecutive.py:
 '''
@@ -1095,6 +1184,57 @@ def main():
 if __name__ == '__main__':
     main()
 
+## arr_ReorganizeString.py:
+'''
+https://leetcode.com/problems/reorganize-string/description/
+Given a string S, check if the letters can be rearranged so that two characters that are adjacent to each other are not the same.
+'''
+
+# Sort the string according to freq of characters
+# find middle
+# place start to middle at odd indices and middle to end at even indices
+# letters cannot be rearranged if last 2 characters are the same
+def string(S):
+    a = sorted(sorted(S), key=S.count)
+    h = int(len(a)/2)
+    a[1::2], a[::2] = a[:h], a[h:]
+    return ''.join(a) * (a[-1:] != a[-2:-1]) 
+
+print(string("vvvlo")) # vlvov
+print(string("lovvv")) # vlvov
+print(string("a")) # a
+print(string("aa"))
+print(string("aab")) # aba
+print(string("aaab"))
+print(string("baaba")) # ababa
+print(string("abaaaba"))
+print(string("bbbbbbb"))
+
+'''
+def string(S):
+    start, end, nextn = 1, len(S), 0
+    quit = False
+    while start < end:
+        if S[start] == S[start-1]:
+            if nextn >= end: 
+                return ""
+            while S[nextn] == S[start] or nextn+1 < end and S[nextn-1] == S[nextn+1]:
+                nextn += 1
+                if nextn >= end: 
+                    return ""
+            print('start ', start, ' nextn ', nextn, ' end ', end, ' S ', S)
+            if nextn < start:
+                S = S[:nextn] + S[nextn+1:start] + S[nextn] + S[start:]
+            else:
+                S = S[:start] + S[nextn] + S[start:nextn] + S[nextn+1:]
+                nextn += 1
+            start += 1
+            print('after start ', start, ' nextn ', nextn, ' end ', end, ' S ', S)
+        else:
+            start += 1
+    return S 
+'''
+
 ## arr_Rotate.py:
 '''
 You are given an n x n 2D matrix that represents an image. Rotate the image by 90 degrees (clockwise).
@@ -1345,18 +1485,6 @@ print(single_short(nums)) # 7
 nums = [17,12,5,-6,12,4,17,-5,2,-3,2,4,5,16,-3,-4,15,15,-4,-5,-6]
 print(single_number(nums)) # 16
 print(single_short(nums)) # 16
-
-## arr_SingleNumber2.py:
-
-def single_number(nums):
-    d = {}
-    for n in nums:
-        d[n] = d.get(n, 0) + 1
-    for k,v in d.items():
-        if v == 1:
-            return k
-
-print(single_number([2,2,2,1]))
 
 ## arr_Sudoku.py:
 '''
@@ -1867,34 +1995,35 @@ print(getsegments(data, 'Signup', ['city', 'gender', 'origin']))
 https://leetcode.com/problems/lru-cache/description/
 '''
 
+# get: if key not in dict, return -1 
+#      if key is in dict, get index, slice to append at the back
+# put: if key is in dict, simply change value
+#      if len(cache) same as capacity, remove LRU from cache
+#      add new key, value to dict and cache 
 class LRUCache(object):
     def __init__(self, capacity):
        self.capacity = capacity
        self.d = {}
-       self.index = 0
        self.lrulist = []
 
-    def get(self, key):
+    def get(self, key):         # O(n) cause of slicing
         if key not in self.d:
             return -1
         i = self.lrulist.index(key)
         self.lrulist = self.lrulist[:i] + self.lrulist[i+1:] + [key]
         return self.d.get(key)
 
-    def put(self, key, value):
+    def put(self, key, value):# O(n) cause of slicing
         if key in self.d:
             self.d[key] = value
             i = self.lrulist.index(key)
             self.lrulist = self.lrulist[:i] + self.lrulist[i+1:] + [key]
-        elif self.index == self.capacity:
-            self.d.pop(self.lrulist[0], None)
-            self.lrulist = self.lrulist[1:]
-            self.d[key] = value
-            self.lrulist.append(key)
         else:
+            if len(self.lrulist) == self.capacity:
+                self.d.pop(self.lrulist[0], None)
+                self.lrulist = self.lrulist[1:]
             self.d[key] = value
             self.lrulist.append(key)
-            self.index += 1
 
 # Using doubly linked list to provide O(1) get / put
 class Node:
@@ -1904,13 +2033,19 @@ class Node:
         self.prev = None
         self.next = None
 
-class LRUCache(object):
+# dict: {key: node}
+# get: if key not in dict, return -1 
+#      if key in dict, remove node, add node to before tail, return val
+# put: if key in dict, remove node
+#      if capacity is up, remove head.next, remove from dict
+#      then create and add node to tail.prev and to dict
+class LRUCacheTwo(object):
     def __init__(self, capacity):
         self.capacity = capacity
         self.d = {}
         self.head = Node(0, 0)
         self.tail = Node(0, 0)
-        self.head.head = self.tail 
+        self.head.next = self.tail 
         self.tail.prev = self.head 
 
     def get(self, key):
@@ -1924,13 +2059,13 @@ class LRUCache(object):
     def put(self, key, value):
         if key in self.d:
             self.remove(self.d[key])
-        n = Node(key, value)
-        self.d[key] = n
-        self.add(n)
-        if len(self.d) > self.capacity:
+        elif len(self.d) == self.capacity:
             n = self.head.next
             self.remove(n)
             self.d.pop(n.key, None)
+        n = Node(key, value)
+        self.d[key] = n
+        self.add(n)
 
     def remove(self, node):
         p = node.prev
@@ -1946,7 +2081,7 @@ class LRUCache(object):
         node.next = self.tail
 
 def main():
-    obj = LRUCache(2)
+    obj = LRUCacheTwo(2)
     obj.put(1,1)
     obj.put(2,2)
     print(obj.get(1)) # 1
@@ -1958,7 +2093,7 @@ def main():
     print(obj.get(4)) # 4
     # print(obj.d, obj.lrulist)
 
-    obj = LRUCache(2)
+    obj = LRUCacheTwo(2)
     print(obj.get(2)) # -1 
     obj.put(2, 6)
     print(obj.get(1)) # -1 
@@ -1968,7 +2103,7 @@ def main():
     print(obj.get(2)) # 6
     # print(obj.d, obj.lrulist)
 
-    obj = LRUCache(2)
+    obj = LRUCacheTwo(2)
     obj.put(2,1)
     obj.put(1,1)
     obj.put(2,3)
@@ -3868,95 +4003,6 @@ with open("result.py", "w") as outfile:
             outfile.write(infile.read())
             outfile.write("\n")
 
-## Server.py:
-import unittest
-
-class Server:
-    def __init__(self, lists = {}, ids = []):
-        self.pool = lists
-        self.allocated_ids = ids
-
-    # pool = { 'hosttype': [1,2,3] }
-    def allocate(self, hosttype):
-        if hosttype not in self.pool:
-            self.pool[hosttype] = []
-        curr = self.get_server_id(self.allocated_ids)
-        self.pool[hosttype].append(curr)
-        self.allocated_ids.append(curr)
-        return curr
-
-    def deallocate(self, hostname): # O(n^2)
-        self.allocated_ids.remove(hostname)
-        for k, v in self.pool.items(): # O(n)
-            if hostname in v: # O(n) == could use set
-                self.pool[k].remove(hostname)
-
-    def get_server_id(self, servers):
-        if not servers: return 1
-        servers = sorted(servers) # O(nlogn)
-        minn = 1 
-        for i in range(len(servers)): # O(n)
-            if servers[i] == minn:
-                minn += 1
-            elif servers[i] > minn:
-                return minn
-        if minn == len(servers)+1:
-            return minn
-
-class TestServer(unittest.TestCase):
-    def setUp(self):
-        self.server = Server()
-
-    def test_deallocate_one_hostname(self):
-        self.server = Server({'type': [1]}, [1])
-        self.server.deallocate(1)
-        self.assertEqual(self.server.allocated_ids, [])
-        self.assertEqual(self.server.pool['type'], [])
-
-    def test_allocate_empty_hosttype(self):
-        result = self.server.allocate('api')
-        self.assertEqual(result, 1)
-
-    def test_allocate_nonempty_hosttype(self):
-        self.server = Server({'type': [1,3,4]}, [1,3,4])
-        result = self.server.allocate('type')
-        self.assertEqual(result, 2)
-
-    def test_allocate_multiple_hosttype(self):
-        self.server = Server({'type': [1,3,4]}, [1,3,4])
-        result = self.server.allocate('api')
-        self.assertEqual(result, 2)
-
-    def test_get_empty_list(self):
-        result = self.server.get_server_id([])
-        self.assertEqual(result, 1)
-
-    def test_get_ascending_list(self):
-        result = self.server.get_server_id([1,2,3])
-        self.assertEqual(result, 4)
-
-    def test_get_missing_number_list(self):
-        result = self.server.get_server_id([5,4,2,1])
-        self.assertEqual(result, 3)
-
-    def test_get_not_starting_one(self):
-        result = self.server.get_server_id([4,3])
-        self.assertEqual(result, 1)
-
-# if __name__ == '__main__':
-     # unittest.main()
-
-server = Server()
-server.allocate('type')
-print(server.pool)
-servers = [1,2,4]
-print(server.get_server_id(servers))
-servers = []
-print(server.get_server_id(servers))
-servers = [3,2,1]
-print(server.get_server_id(servers))
-servers = [2,4]
-print(server.get_server_id(servers))
 ## sort_Bubble.py:
 # Swaps elements from 0...sorted index, bringing max to the end each time
 # Best: O(n) sorted arr, Worst: O(n^2), In-place, Stable, Extra O(1)
@@ -4067,56 +4113,6 @@ print(is_subseq_s('axc', 'ahbgdc')) # False
 print(is_subseq_short('abc', 'ahbgdc')) # True
 print(is_subseq_short('axgd', 'ahbgdc')) # False, will give [T,F,F]
 
-## str_PalindromeSubsequence.py:
-'''
-https://leetcode.com/contest/weekly-contest-59/problems/count-different-palindromic-subsequences/
-'''
-import collections
-
-def palindrome_subseq(S):
-    def is_palindrome(s):
-        mid = int(len(s) / 2)
-        if len(s) % 2 == 1:
-            start = end = mid
-        else: 
-            start, end = mid-1, mid
-        while start >= 0 and end <= len(s)-1:
-            if s[start] != s[end]:
-                return False
-            start -= 1
-            end += 1
-        return True
-
-    def subseq(s):
-        sets = set()
-        sets.add('')
-        for ch in s:
-            newsets = set()
-            for st in sets:
-                newstr = st + ch
-                newsets.add(newstr)
-            sets.update(newsets)
-        sets.remove('')
-        return sets
-        print(sets)
-    sets = subseq(S)
-    ans = 0
-    dp = collections.defaultdict(bool)
-    for st in sets:
-        print(st, dp)
-        if dp[st]:
-            ans += 1
-        else:
-            dp[st] = is_palindrome(st)
-            if dp[st]: ans += 1
-    return ans
-
-
-
-print(palindrome_subseq('abc'))
-print(palindrome_subseq('bccb'))
-print(palindrome_subseq('abcdabcdabcdabcdabcdabcdabcdabcddcbadcbadcbadcbadcbadcbadcbadcba'))
-
 ## str_SwapMaximum.py:
 '''
 https://leetcode.com/problems/maximum-swap/description/
@@ -4178,286 +4174,6 @@ print(max_swap(4579)) # 9574
 print(max_swap(98368)) # 98863
 print(max_swap(1993)) # 9913
 
-## Stripe.py:
-# You're running a pool of servers where the servers are numbered sequentially starting from 1. Over time, any given server might explode, in which case its server number is made available for reuse. When a new server is launched, it should be given the lowest available number.
-
-# Write a function which, given the list of currently allocated server numbers, returns the number of the next server to allocate. In addition, you should demonstrate your approach to testing that your function is correct. You may choose to use an existing testing library for your language if you choose, or you may write your own process if you prefer.
-
-# For example, your function should behave something like the following:
-
-#  >> next_server_number([5, 3, 1])
-#  2
-#  >> next_server_number([5, 4, 1, 2])
-#  3
-#  >> next_server_number([3, 2, 1])
-#  4
-#  >> next_server_number([2, 3])
-#  1
-#  >> next_server_number([])
-#  1
-
-# Server names consist of an alphabetic host type (e.g. "apibox") concatenated with the server number, with server numbers allocated as before (so "apibox1", "apibox2", etc. are valid hostnames).
-
-# Write a name tracking class with two operations, allocate(host_type) and deallocate(hostname). The former should reserve and return the next available hostname, while the latter should release that hostname back into the pool.
-
-# For example:
-
-# >> tracker = Tracker()
-# >> tracker.allocate("apibox")
-# "apibox1"
-# >> tracker.allocate("apibox")
-# "apibox2"
-# >> tracker.deallocate("apibox1")
-# nil
-# >> tracker.allocate("apibox")
-# "apibox1"
-# >> tracker.allocate("sitebox")
-# "sitebox1"
-
-# servers { 'hosttype': [list of servers], 'hosttype2': [servers] }
-import re
-import unittest 
-
-def get_next_server(servers):
-    sorted_servers = sorted(servers)
-
-    minn = 1
-    for i in range(len(sorted_servers)):
-        if sorted_servers[i] == minn:
-            minn += 1
-        elif sorted_servers[i] > minn:
-            return minn
-    return minn
-
-class Tracker:
-    def __init__(self):
-        self.servers = {}
-        
-    def allocate(self, hosttype):
-        if hosttype not in self.servers:
-            self.servers[hosttype] = []
-        currid = get_next_server(self.servers[hosttype])
-        self.servers[hosttype].append(currid)
-        return hosttype + str(currid)
-    
-    def deallocate(self, hostname):
-        numindex = re.search('\d', hostname)
-        name = hostname[:numindex.start()]
-        numid = hostname[numindex.start():]
-        self.servers[name].remove(int(numid))   
-        
-class TestTracker(unittest.TestCase):
-    def setUp(self):
-        self.tracker = Tracker()
-    
-    def test_allocate_empty(self):
-        nexthostname = self.tracker.allocate('apibox')
-        self.assertEqual(nexthostname, 'apibox1')
-        nexthostname = self.tracker.allocate('apibox')
-        self.assertEqual(nexthostname, 'apibox2')
-        
-    def test_allocate_nonempty(self):
-        self.tracker.allocate('apibox')
-        self.tracker.allocate('apibox')
-        nexthostname = self.tracker.allocate('sitebox')
-        self.assertEqual(nexthostname, 'sitebox1')
-    
-    def test_deallocate(self):
-        self.tracker.allocate('apibox')
-        self.tracker.allocate('apibox')
-        self.tracker.deallocate("apibox1")
-        self.assertEqual(self.tracker.servers, {'apibox': [2]})
-
-# tracker = Tracker()
-# print(tracker.allocate('apibox'))
-# print(tracker.allocate('apibox'))
-# print(tracker.deallocate('apibox1'))
-# [1,2,3]
-# minn   curr_server
-# 1      1
-# 2      2
-# 3      3
-# 4 
-# [1,2,4]
-# 1      1
-# 2      2
-# 3      4
-# [1,1,2]
-# 3
-# minn curr
-# 1    1
-# 2    1
-# 2    2
-# 3
-
-def get_next_server(servers):
-    sorted_servers = sorted(servers)
-
-    minn = 1
-    for i in range(len(sorted_servers)):
-        if sorted_servers[i] == minn:
-            minn += 1
-        elif sorted_servers[i] > minn:
-            return minn
-    return minn
-
-class TestNextServer(unittest.TestCase):
-    def test_get_emptylist(self):
-        nextid = get_next_server([])
-        self.assertEqual(nextid, 1)
-    
-    def test_get_withgap(self):
-        nextid = get_next_server([5, 4, 1, 2])
-        self.assertEqual(nextid, 3)
-    
-    def test_get_inorder(self):
-        nextid = get_next_server([3, 2, 1])
-        self.assertEqual(nextid, 4)
-    
-    def test_get_withoutone(self):
-        nextid = get_next_server([3, 2])
-        self.assertEqual(nextid, 1)
-    
-if __name__ == '__main__':
-    unittest.main()
-
-## stripe_map.py:
-'''
-Write a map implementation with a get function that lets you retrieve the value of a key at a particular time.
-t:0 A =1
-t:2 A = 2
-get(A, t:1) -> 1
-get(A, t:3) -> 2
-'''
-
-# put all into a list first
-class Time:
-    def __init__(self):
-        self.time = []
-        
-    def get(self, key, time):
-        if time >= len(self.time):
-            return self.time[-1][key]
-        hm = self.time[time]
-        print(self.time[time])
-        if hm:
-            return hm[key]
-        else:
-            return None
-    
-    def set(self, time, key, value):
-        if len(self.time) == time:
-            self.time.append({key: value})
-        elif time < len(self.time):
-            d = self.time[time]
-            d[key] = value
-        else:
-            length = len(self.time)
-            diff = time - length
-            d = self.time[length-1]
-            for i in range(length, length+diff+1):
-                self.time.append(dict(d))
-            d = self.time[time]
-            d[key] = value
-
-t = Time()
-t.set(0, 'A', 1)
-t.set(0, 'B', 1)
-t.set(2, 'A', 2)
-print(t.get('A', 1)) # 1
-print(t.get('A', 3)) # 2
-print(t.get('B', 3)) # 1
-
-## test.py:
-def check_diag(l):
-    col = 3
-    for k in range(len(l)-1, -1, -1):
-        print(k, col)
-        if col >= 0 and l[k][col] == 'Q':
-            print('Q found')
-        col -= 1
-
-l = ['Q....', '.Q...', '..Q..', '...Q.', '....Q']
-check_diag(l)
-
-def countPalindromicSubsequences(S):
-    N = len(S)
-    A = [ord(c) - ord('a') for c in S]
-    prv = [None] * N
-    nxt = [None] * N
-
-    last = [None] * 4
-    for i in range(N):
-        last[A[i]] = i
-        prv[i] = tuple(last)
-            
-    last = [None] * 4
-    for i in range(N-1, -1, -1):
-        last[A[i]] = i
-        nxt[i] = tuple(last)
-    
-    # print('prev', prv)
-    # print('next ', nxt)
-    MOD = 10**9 + 7
-    memo = [[None] * N for _ in range(N)]
-    def dp(i, j):
-        print('dp ', i, j)
-        if memo[i][j] is not None:
-            return memo[i][j]
-        ans = 1
-        if i <= j:
-            for x in range(4):
-                print('x is ', x)
-                i0 = nxt[i][x]
-                j0 = prv[j][x]
-                if i0 is not None and i <= i0 <= j:
-                    print ('i <= i0 <= j', i, i0, j)
-                    ans += 1
-                if i0 is not None and j0 is not None and i0 < j0:
-                    print ('i0 < j0', i0, j0)
-                    ans += dp(i0+1, j0-1)
-        ans %= MOD
-        memo[i][j] = ans
-        return ans
-    return dp(0, N-1) - 1
-#print(countPalindromicSubsequences('bccb'))
-# print(countPalindromicSubsequences('a'))
-'''
-def test():
-    s = "yxyxyxyxyxioio"
-    d = {}
-    newstr = ''
-    vowels = ['a', 'e', 'i', 'o', 'u']
-    for ch in s:
-    if ch not in vowels and ch not in newstr:
-        newstr += ch
-    print('ch ', ch, ' newstr ', newstr)
-    d[ch] = True
-    print(newstr)
-∏
-print(test())
-'''
-
-## test_Server.py:
-import Server as Server
-import unittest
-
-class TestServer(unittest.TestCase):
-    def test_get_empty_list(self):
-        result = Server.get_server_id([])
-        self.assertEqual(result, 1)
-
-    def test_get_ascending_list(self):
-        result = Server.get_server_id([1,2,3])
-        self.asertEqual(result, 4)
-
-    def test_get_missing_number_list(self):
-        result = Server.get_server_id([5,4,2,1])
-        self.assertEqual(result, 3)
-
-if __name__ == '__main__':
-    unittest.main()
-
 ## tree_Buildtree.py:
 # Definition for a binary tree node.
 class TreeNode(object):
@@ -4465,6 +4181,47 @@ class TreeNode(object):
         self.val = x
         self.left = None
         self.right = None
+
+def level_order(root):
+    index = 0
+    ans, queue = [], [(root, index)]
+    while queue:
+        node, level = queue.pop(0)
+        if node:
+            if len(ans) == level:
+                ans.append([])
+            ans[level] = ans[level] + [node.val]
+            queue.append((node.left, level+1))
+            queue.append((node.right, level+1))
+    return ans
+
+'''
+https://leetcode.com/problems/convert-sorted-array-to-binary-search-tree/description/
+Given an array where elements are sorted in ascending order, convert it to a height balanced BST.
+'''
+
+def sortedArrayToBST(nums):
+    """
+    :type nums: List[int]
+    :rtype: TreeNode
+    """
+    return convert(0, len(nums)-1, nums)
+
+def convert(start, end, nums):
+    if start > end: return None
+    mid = int((start + end) / 2)
+    root = TreeNode(nums[mid])
+    root.left = convert(start, mid-1, nums)
+    root.right = convert(mid+1, end, nums)
+    return root
+
+root = sortedArrayToBST([-10,-3,0,5,9])
+print(level_order(root))
+
+'''
+https://leetcode.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal/description/
+Given preorder and inorder traversal of a tree, construct the binary tree.
+'''
 
 def build_tree(preorder, inorder):
     if preorder == []:
@@ -4483,19 +4240,6 @@ def build_tree(preorder, inorder):
     root.left = build_tree(preorder[1:len_left+1], leftinorder)
     root.right = build_tree(preorder[len_left+1:len_left+1+len_right], rightinorder)
     return root
-
-def level_order(root):
-    index = 0
-    ans, queue = [], [(root, index)]
-    while queue:
-        node, level = queue.pop(0)
-        if node:
-            if len(ans) == level:
-                ans.append([])
-            ans[level] = ans[level] + [node.val]
-            queue.append((node.left, level+1))
-            queue.append((node.right, level+1))
-    return ans
 
 preorder = [8,5,9,7,1,12,2,4,11,3]
 inorder = [9,5,1,7,2,12,8,4,3,11]
@@ -4634,6 +4378,20 @@ class TreeNode(object):
         self.left = None
         self.right = None
 
+# use inorder and check! 
+def kth_smallest_short(root, k):
+    stack = []
+    while stack or root:
+        if root:
+            stack.append(root)
+            root = root.left
+        else:
+            root = stack.pop()
+            if k == 1:
+                return root.val
+            k -= 1
+            root = root.right
+
 # check left children. if found, return left immediately 
 # else, left child returned, add 1 to count and check == k
 # check right children. if found, return immediately
@@ -4657,20 +4415,6 @@ def kth_smallest(root, k):
         return (node, count, found)
     return kth(root, k, 0, False)[0].val
 
-# or just use inorder and check! 
-def kth_smallest_short(root, k):
-    stack = []
-    while stack or root:
-        if root:
-            stack.append(root)
-            root = root.left
-        else:
-            root = stack.pop()
-            if k == 1:
-                return root.val
-            k -= 1
-            root = root.right
-
 root = TreeNode(4)
 root.left = TreeNode(2)
 root.right = TreeNode(6)
@@ -4693,6 +4437,10 @@ print('kth smallest: ', kth_smallest_short(root1, 2)) # 2
 print('kth smallest: ', kth_smallest_short(root2, 1)) # 1 
 
 ## tree_LevelOrderTraversal.py:
+'''
+https://leetcode.com/problems/binary-tree-level-order-traversal/
+'''
+
 # Definition for a binary tree node.
 class TreeNode(object):
     def __init__(self, x):
@@ -4700,17 +4448,32 @@ class TreeNode(object):
         self.left = None
         self.right = None
 
-def level_order(root):
-    index = 0
-    ans, queue = [], [(root, index)]
+# adding by level 
+def level_withoutlevel(root):
+    if not root: return []
+    ans, queue = [], [root]
     while queue:
-        node, level = queue.pop(0)
-        if node:
-            if len(ans) == level:
-                ans.append([])
-            ans[level] = ans[level] + [node.val]
-            queue.append((node.left, level+1))
-            queue.append((node.right, level+1))
+        level = []
+        num = len(queue)
+        for i in range(num):
+            node = queue.pop(0)
+            level.append(node.val)
+            if node.left: queue.append(node.left)
+            if node.right: queue.append(node.right)
+        ans.append(level)
+    return ans
+            
+
+# adding per node
+def level(root):
+    if not root: return []
+    ans, queue = [], [(root, 0)]
+    while queue:
+        curr, level = queue.pop(0)
+        if len(ans) == level: ans.append([])
+        ans[level].append(curr.val)
+        if curr.left: queue.append((curr.left, level+1))
+        if curr.right: queue.append((curr.right, level+1))
     return ans
 
 root = TreeNode(1)
@@ -4720,7 +4483,8 @@ root.left.left = TreeNode(4)
 root.left.right = TreeNode(5)
 
 print('level order')
-print(level_order(root))
+print(level(root))
+print(level_withoutlevel(root))
 
 ## tree_LowestCommonAncestor.py:
 '''
@@ -5142,6 +4906,8 @@ print(same_tree_iter(root, root))
 print(same_tree_short(root, root))
 
 ## tree_Serialise.py:
+import collections 
+
 # Definition for a binary tree node.
 class TreeNode(object):
     def __init__(self, x):
@@ -5149,20 +4915,40 @@ class TreeNode(object):
         self.left = None
         self.right = None
 
+# 1 2 # # 3 4 # # 5 # # 
 def serialise(root):
-    def doit(node):
+    def ser(node):
         if node:
             vals.append(str(node.val))
-            doit(node.left)
-            doit(node.right)
+            ser(node.left)
+            ser(node.right)
         else:
             vals.append('#')
     vals = []
-    doit(root)
-    print(' '.join(vals))
+    ser(root)
     return ' '.join(vals)
 
+# Changed to not use pop(0) as it is O(n)
+# deque makes popleft O(1)
 def deserialise(data):
+    if not data: return
+    def deser(vals):
+        if len(vals) == 0: return
+        # val = vals.pop(0) # so that we will go through the array in order
+        val = vals.popleft()
+        print(val, vals)
+        if val == '#':
+            return None
+        node = TreeNode(int(val))
+        node.left = deser(vals)
+        node.right = deser(vals)
+        return node
+             
+    # vals = data.split()
+    vals = collections.deque(data.split())
+    return deser(vals)
+
+def deserialise_withiter(data):
     def doit():
         val = next(vals)
         print('val ', val, ' vals ', vals)
@@ -5242,10 +5028,12 @@ def level_order(root):
 root = TreeNode(1)
 root.left = TreeNode(2)
 root.right = TreeNode(3)
-root.left.left = TreeNode(4)
-root.left.right = TreeNode(5)
+root.right.left = TreeNode(4)
+root.right.right = TreeNode(5)
 
-ans = deserialise(serialise(root))
+data = serialise(root)
+print('data ', data)
+ans = deserialise(data)
 print(level_order(ans))
 
 '''
@@ -5253,6 +5041,82 @@ root = deserialise("5,4,7,3,None,2,None,-1,None,9")
 print(level_order(root))
 print(serialise(root))
 '''
+
+## tree_SerialiseBST.py:
+'''
+https://leetcode.com/problems/serialize-and-deserialize-bst/description/
+'''
+
+import collections
+
+class TreeNode(object):
+    def __init__(self, x):
+        self.val = x
+        self.right = None
+        self.left = None
+
+# get preorder sequence
+def serialize(root):
+    """Encodes a tree to a single string.  
+    :type root: TreeNode
+    :rtype: str
+    """
+    def preorder(node):
+        if node:
+            ans.append(str(node.val))
+            preorder(node.left)
+            preorder(node.right)
+        else: return
+    ans = []
+    preorder(root)
+    return ' '.join(ans)
+
+# using preorder sequence, and tracking min/max value
+# pop(0) only if min < val < max 
+# recurse down the same way to obtain a tree
+def deserialize(data):
+    """Decodes your encoded data to tree.
+
+    :type data: str
+    :rtype: TreeNode
+    """
+    def build(vals, minn, maxn):
+        if len(vals) == 0: return
+        val = vals[0]
+        if minn < val and val < maxn:
+            val = vals.popleft()
+            node = TreeNode(val)
+            node.left = build(vals, minn, val)
+            node.right = build(vals, val, maxn)
+            return node 
+        else: return
+
+    vals = collections.deque(int(val) for val in data.split())
+    return build(vals, float('-inf'), float('inf'))
+
+def level_order(root):
+    index = 0
+    ans, queue = [], [(root, index)]
+    while queue:
+        node, level = queue.pop(0)
+        if node:
+            if len(ans) == level:
+                ans.append([])
+            ans[level] = ans[level] + [node.val]
+            queue.append((node.left, level+1))
+            queue.append((node.right, level+1))
+    return ans
+
+root = TreeNode(10)
+root.left = TreeNode(6)
+root.right = TreeNode(20)
+root.left.left = TreeNode(5)
+root.left.right = TreeNode(7)
+root.right.right = TreeNode(30)
+data = serialize(root)
+print('data ', data)
+ans = deserialize(data)
+print(level_order(ans))
 
 ## tree_Subtree.py:
 # Definition for a binary tree node.
@@ -5289,6 +5153,7 @@ print(is_subtree(root, root2))
 ## tree_Symmetric.py:
 '''
 https://leetcode.com/problems/symmetric-tree/description/
+Given a binary tree, check whether it is a mirror of itself (ie, symmetric around its center).
 '''
 
 # Definition for a binary tree node.
@@ -5297,6 +5162,17 @@ class TreeNode:
         self.val = x
         self.left = None
         self.right = None
+
+def isSymmetricIter(root):
+    if not root: return True
+    stack = [root.left, root.right]
+    while stack:
+        left, right = stack.pop(), stack.pop()
+        if left is None and right is None: continue
+        elif left == None or right == None: return False
+        if left.val != right.val: return False
+        stack.extend([left.left, right.right, left.right, right.left])
+    return True
 
 def isSymmetric(root):
     def sym(left, right):
@@ -5307,27 +5183,17 @@ def isSymmetric(root):
         return False
     return sym(root, root)
 
-'''
-def isTreeSymmetric(t):
-    if not t: return True
-    if not t.left and not t.right:
+def isSym(left, right):
+    if left == None and right == None:
         return True
-    elif t.left and t.right:
-        return symmetric(t.left, t.right)
-    else:
+    elif left == None or right == None:
         return False
-
-def symmetric(left, right):
-    if not left and not right:
-        return True
-    elif left and right:
-        if int(left.value) != int(right.value):
-             return False
-        return symmetric(left.left, right.right) or symmetric(left.right, right.left)
-    else:
-        return False
-'''
-
+    return left.val == right.val and isSym(left.right, right.left) and isSym(left.left, right.right)
+    
+def isSymmetricShort(root):
+    if not root: return True
+    return isSym(root.left, root.right)
+    
 root = TreeNode(1)
 root.left = TreeNode(2)
 root.right = TreeNode(2)
@@ -5336,6 +5202,8 @@ root.left.right = TreeNode(4)
 root.right.left = TreeNode(4)
 root.right.right = TreeNode(3)
 print(isSymmetric(root)) # True 
+print(isSymmetricShort(root)) # True 
+print(isSymmetricIter(root)) # True 
 
 root = TreeNode(1)
 root.left = TreeNode(2)
@@ -5343,6 +5211,8 @@ root.right = TreeNode(2)
 root.left.right = TreeNode(3)
 root.right.right = TreeNode(3)
 print(isSymmetric(root)) # False
+print(isSymmetricShort(root)) # False
+print(isSymmetricIter(root)) # False
 
 ## tree_TreeTraversals.py:
 # Definition for a binary tree node.
@@ -5485,6 +5355,16 @@ class TreeNode(object):
         self.left = None
         self.right = None
 
+def is_valid_short(root):
+	return isValid(root, float('inf'), float('-inf'))
+
+# not <= cause cant children must be < or > parent
+def isValid(root, maxn, minn):
+    if not root: return True
+    if not (minn < root.val and root.val < maxn):
+        return False
+    return isValid(root.left, min(maxn, root.val), minn) and isValid(root.right, maxn, max(minn, root.val))
+
 def is_valid_bst(root):
     def is_valid(node):
         if node is None:
@@ -5502,21 +5382,58 @@ def is_valid_bst(root):
         return (node, min(lmin, rmin), max(lmax, rmax), lbool == rbool)
     return is_valid(root)[3]
 
-def is_valid_short(root):
-    def is_valid(node, nmin, nmax):
-        if not node:
-            return True
-        if node.val >= nmin or node.val <= nmax:
-            return False
-        return is_valid(node.left, min(nmin, node.val), nmax) and is_valid(node.right, nmin, max(nmax, node.val))
-    return is_valid(root, float('inf'), float('-inf'))
-
 root = TreeNode(10)
 root.left = TreeNode(5)
 root.right = TreeNode(15)
 root.right.left = TreeNode(6)
 root.right.right = TreeNode(20)
 
-print('is valid bst: ', is_valid_bst(root))
-print('is valid bst: ', is_valid_short(root))
+print('is valid bst: ', is_valid_bst(root)) # False
+print('is valid bst: ', is_valid_short(root)) # False
+
+root = TreeNode(1)
+root.left = TreeNode(1)
+
+print('is valid bst: ', is_valid_bst(root)) # False
+print('is valid bst: ', is_valid_short(root)) # False
+
+## tree_ZigzagLevelOrder.py:
+'''
+https://leetcode.com/problems/binary-tree-zigzag-level-order-traversal/description/
+'''
+
+# Definition for a binary tree node.
+class TreeNode:
+    def __init__(self, x):
+        self.val = x
+        self.left = None
+        self.right = None
+
+def zigzagLevelOrder(root):
+    """
+    :type root: TreeNode
+    :rtype: List[List[int]]
+    """
+    if not root: return []
+    index = 0
+    ans, queue = [], [root]
+    while queue:
+        level = []
+        num = len(queue)
+        for i in range(num):
+            curr = queue.pop(0)
+            level.append(curr.val)
+            if curr.left: queue.append(curr.left)
+            if curr.right: queue.append(curr.right)
+        if index % 2 == 1: level.reverse()
+        index += 1
+        ans.append(level)
+    return ans
+
+root = TreeNode(3)
+root.left = TreeNode(9)
+root.right = TreeNode(20)
+root.right.left = TreeNode(15)
+root.right.right = TreeNode(7)
+print(zigzagLevelOrder(root)) # [[3], [20, 9], [15, 7]]
 
