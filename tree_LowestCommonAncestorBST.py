@@ -19,11 +19,23 @@ class TreeNode(object):
         self.left = None
         self.right = None
 
-# check if value is p or q 
-# if it is, return p or q
+# O(logn) time 
+# if both p and q are smaller than root, go left subtree to check
+# if both p and q are larger than root, go right subtree to check
+# else, p and q are left children or
+# p is root and q is child || q is root and p is child
+def lowest_short(root, p, q):
+    if p.val < root.val and q.val < root.val:
+        return lowest_short(root.left, p, q)
+    if p.val > root.val and q.val > root.val:
+        return lowest_short(root.right, p, q)
+    return root
+
+# if root is p.val or q.val, return p/q
 # if both left and right children have value, means p and q is found 
 # return current node 
 # else, return left or right 
+# note: doesnt work if tree is binary tree, cause we're using val here
 def lowest(root, p, q):
     if root is None:
         return None
@@ -40,17 +52,6 @@ def lowest(root, p, q):
         return root
     return left or right
 
-# if both p and q are smaller than root, go left subtree to check
-# if both p and q are larger than root, go right subtree to check
-# else, p and q are left children or
-# p is root and q is child || q is root and p is child
-def lowest_short(root, p, q):
-    if p.val < root.val and q.val < root.val:
-        return lowest_short(root.left, p, q)
-    if p.val > root.val and q.val > root.val:
-        return lowest_short(root.right, p, q)
-    return root
-
 root = TreeNode(6)
 root.left = TreeNode(2)
 root.right = TreeNode(8)
@@ -58,5 +59,5 @@ root.right = TreeNode(8)
 p = TreeNode(2)
 q = TreeNode(8)
 
-print(lowest(root, p, q).val)
-print(lowest_short(root, p, q).val)
+print(lowest(root, p, q).val) # 6 
+print(lowest_short(root, p, q).val) # 6

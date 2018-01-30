@@ -1,3 +1,8 @@
+'''
+https://leetcode.com/problems/same-tree/description/
+Given two binary trees, write a function to check if they are the same or not.
+'''
+
 # Definition for a binary tree node.
 class TreeNode(object):
     def __init__(self, x):
@@ -5,6 +10,7 @@ class TreeNode(object):
         self.left = None
         self.right = None
 
+# O(n) time and space 
 def same_tree(p, q):
     if p is None and q is None:
         return True
@@ -12,6 +18,7 @@ def same_tree(p, q):
         return False
     return p.val == q.val and same_tree(p.left, q.left) and same_tree(p.right, q.right)
 
+# O(n) time and space 
 def same_tree_iter(p, q):
     stack = [(p, q)]
     while stack:

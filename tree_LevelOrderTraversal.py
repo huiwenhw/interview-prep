@@ -24,7 +24,6 @@ def level_withoutlevel(root):
         ans.append(level)
     return ans
             
-
 # adding per node
 def level(root):
     if not root: return []

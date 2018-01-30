@@ -10,6 +10,7 @@ class TreeNode:
         self.left = None
         self.right = None
 
+# iteration, O(n) time and space
 def isSymmetricIter(root):
     if not root: return True
     stack = [root.left, root.right]
@@ -21,25 +22,19 @@ def isSymmetricIter(root):
         stack.extend([left.left, right.right, left.right, right.left])
     return True
 
+# using recursion
 def isSymmetric(root):
-    def sym(left, right):
-        if not left and not right: 
-            return True
-        if left and right and left.val == right.val:
-            return sym(left.left, right.right) and sym(left.right, right.left)
-        return False
-    return sym(root, root)
+    """
+    :type root: TreeNode
+    :rtype: bool
+    """
+    if root is None: return True
+    return sym(root.left, root.right)
 
-def isSym(left, right):
-    if left == None and right == None:
-        return True
-    elif left == None or right == None:
-        return False
-    return left.val == right.val and isSym(left.right, right.left) and isSym(left.left, right.right)
-    
-def isSymmetricShort(root):
-    if not root: return True
-    return isSym(root.left, root.right)
+def sym(p, q):
+    if p and q:
+        return p.val == q.val and sym(p.left, q.right) and sym(p.right, q.left)
+    return p is q
     
 root = TreeNode(1)
 root.left = TreeNode(2)
@@ -49,7 +44,6 @@ root.left.right = TreeNode(4)
 root.right.left = TreeNode(4)
 root.right.right = TreeNode(3)
 print(isSymmetric(root)) # True 
-print(isSymmetricShort(root)) # True 
 print(isSymmetricIter(root)) # True 
 
 root = TreeNode(1)
@@ -58,5 +52,4 @@ root.right = TreeNode(2)
 root.left.right = TreeNode(3)
 root.right.right = TreeNode(3)
 print(isSymmetric(root)) # False
-print(isSymmetricShort(root)) # False
 print(isSymmetricIter(root)) # False

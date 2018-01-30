@@ -1,3 +1,9 @@
+'''
+https://leetcode.com/problems/binary-tree-inorder-traversal/description/
+https://leetcode.com/problems/binary-tree-preorder-traversal/description/
+https://leetcode.com/problems/binary-tree-postorder-traversal/description/
+'''
+
 # Definition for a binary tree node.
 class TreeNode(object):
     def __init__(self, x):
@@ -7,31 +13,16 @@ class TreeNode(object):
 
 """
 :type root: TreeNode
-:rtype: List[int]p
+:rtype: List[int]
 """
 # left, root, right
 def inorder(root):
     if root is None:
-        return []
+        return [] # forgot the []
     return inorder(root.left) + [root.val] + inorder(root.right)
 
-def inorder_iter(root):
-    if root is None: return []
-    stack, visited = [root], []
-    while stack:
-        root = stack[-1]
-        if root.left:
-            stack.append(root.left)
-            root.left = None # so that it will not add back the same node
-        else:
-            visited.append(stack.pop().val)
-            if root.right:
-                stack.append(root.right)
-                root.right = None 
-    return visited
-
 def inorder_iter_short(root):
-    visited, stack = [], []
+    visited, stack = [], [] 
     while stack or root:
         if root:
             stack.append(root)
@@ -48,6 +39,18 @@ def preorder(root):
         return []
     return [root.val] + preorder(root.left) + preorder(root.right)
 
+# add root to ans, then add right and left child 
+# always pop left child first
+def preorder_iter_short(root):
+    ans, stack = [], [root]
+    while root or stack:
+        root = stack.pop()
+        if root:
+            ans.append(root.val)
+            stack.append(root.right)
+            stack.append(root.left)
+    return ans
+
 def preorder_iter(root):
     ans, stack = [], []
     while stack or root:
@@ -60,18 +63,6 @@ def preorder_iter(root):
             root = temp.right
     return ans
 
-# add root to ans, then add right and left child 
-# always pop left child first
-def preorder_iter_short(root):
-    ans, stack = [], []
-    while root or stack:
-        if root:
-            ans.append(root.val)
-            stack.append(root.right)
-            stack.append(root.left)
-        root = stack.pop()
-    return ans
-
 # left, right, root
 def postorder(root):
     if root is None:
@@ -82,7 +73,7 @@ def postorder_iter(root):
     ans, stack = [], [(root, False)]
     while stack:
         node, visited_twice = stack.pop()
-        if node:
+        if node: # left this out
             if visited_twice:
                 ans.append(node.val)
             else:

@@ -1,10 +1,15 @@
-# Definition for a binary tree node.
+'''
+https://leetcode.com/problems/subtree-of-another-tree/description/
+'''
+
 class TreeNode(object):
     def __init__(self, x):
         self.val = x
         self.left = None
         self.right = None
 
+# O(st) time
+# for every node of s, we check if subtree == t 
 def is_subtree(s, t):
     def sametree(p, q):
         if p and q:
@@ -27,4 +32,4 @@ root.left.right = TreeNode(5)
 root2 = TreeNode(2)
 root2.left = TreeNode(4)
 root2.right = TreeNode(5)
-print(is_subtree(root, root2))
+print(is_subtree(root, root2)) # True

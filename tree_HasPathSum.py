@@ -20,11 +20,13 @@ class TreeNode:
         self.left = None
         self.right = None
 
+# O(n) time and space 
 def haspathsum_short(root, sumn):
     if not root:
         return False
 
-    if not root.left and not root.right and root.val == sumn:
+    # only return True if current node is leave 
+    if root.left is None and root.right is None and root.val == sumn:
         return True
 
     sumn -= root.val
@@ -49,21 +51,21 @@ def findpath(root, curr, sumn):
 
 root = TreeNode(1)
 root.left = TreeNode(2)
-print(haspathsum_short(root, 1))
-print(haspathsum(root, 1))
+print(haspathsum_short(root, 1)) # False
+print(haspathsum(root, 1)) # False
 
 root = TreeNode(1)
 root.left = TreeNode(2)
 root.left.left = TreeNode(3)
 root.left.left.left = TreeNode(4)
 root.left.left.left.left = TreeNode(5)
-print(haspathsum_short(root, 6))
-print(haspathsum(root, 6))
+print(haspathsum_short(root, 6)) # False 
+print(haspathsum(root, 6)) # False 
 
 root = TreeNode(5)
 root.left = TreeNode(4)
 root.left.left = TreeNode(11)
 root.left.left.right = TreeNode(2)
 root.left.left.left = TreeNode(7)
-print(haspathsum_short(root, 22))
-print(haspathsum(root, 22))
+print(haspathsum_short(root, 22)) # True
+print(haspathsum(root, 22)) # True

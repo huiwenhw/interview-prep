@@ -2,6 +2,7 @@
 https://leetcode.com/problems/serialize-and-deserialize-bst/description/
 '''
 
+from LevelOrder import level_order
 import collections
 
 class TreeNode(object):
@@ -10,6 +11,7 @@ class TreeNode(object):
         self.right = None
         self.left = None
 
+# O(n) time and space 
 # get preorder sequence
 def serialize(root):
     """Encodes a tree to a single string.  
@@ -26,6 +28,7 @@ def serialize(root):
     preorder(root)
     return ' '.join(ans)
 
+# O(n) time and space 
 # using preorder sequence, and tracking min/max value
 # pop(0) only if min < val < max 
 # recurse down the same way to obtain a tree
@@ -39,28 +42,15 @@ def deserialize(data):
         if len(vals) == 0: return
         val = vals[0]
         if minn < val and val < maxn:
-            val = vals.popleft()
+            val = vals.popleft() # O(1) 
             node = TreeNode(val)
             node.left = build(vals, minn, val)
             node.right = build(vals, val, maxn)
             return node 
-        else: return
+        else: return # not needed actually
 
     vals = collections.deque(int(val) for val in data.split())
     return build(vals, float('-inf'), float('inf'))
-
-def level_order(root):
-    index = 0
-    ans, queue = [], [(root, index)]
-    while queue:
-        node, level = queue.pop(0)
-        if node:
-            if len(ans) == level:
-                ans.append([])
-            ans[level] = ans[level] + [node.val]
-            queue.append((node.left, level+1))
-            queue.append((node.right, level+1))
-    return ans
 
 root = TreeNode(10)
 root.left = TreeNode(6)
@@ -69,6 +59,6 @@ root.left.left = TreeNode(5)
 root.left.right = TreeNode(7)
 root.right.right = TreeNode(30)
 data = serialize(root)
-print('data ', data)
+print('data ', data) # 10 6 5 7 20 30
 ans = deserialize(data)
-print(level_order(ans))
+print(level_order(ans)) # [[10], [6, 20], [5, 7, 30]]

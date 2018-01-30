@@ -9,6 +9,7 @@ class TreeNode:
         self.left = None
         self.right = None
 
+# O(n)
 def zigzagLevelOrder(root):
     """
     :type root: TreeNode
@@ -23,7 +24,7 @@ def zigzagLevelOrder(root):
         for i in range(num):
             curr = queue.pop(0)
             level.append(curr.val)
-            if curr.left: queue.append(curr.left)
+            if curr.left: queue.append(curr.left) # forgot to check for curr.left/right 
             if curr.right: queue.append(curr.right)
         if index % 2 == 1: level.reverse()
         index += 1
