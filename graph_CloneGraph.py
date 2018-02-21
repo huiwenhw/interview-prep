@@ -13,12 +13,13 @@ class UndirectedGraphNode:
 # traverse through neighbor list
 # if neighbor hasnt been visited, add it to visited and queue
 # add neighbor to currently clone-ing neighbor list
+# O(V + E)
 def clone_bfs(node):
     if not node:
         return node
     q = []
     visited = {node: UndirectedGraphNode(node.label)}
-    q.append((node, visited[node]))
+    q.append((node, visited[node])) # forgot about queue
     while q:
         curr, clone = q.pop(0)
         for n in curr.neighbors:

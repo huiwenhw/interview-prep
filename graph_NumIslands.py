@@ -17,6 +17,10 @@ Example 2:
 Answer: 3
 '''
 
+# loop through entire grid, check for 1s 
+# dfs through the coords with the 1s and set them to 0s 
+# num of times we dfs == num of islands in total
+# O(rc)^2?
 def islands(grid):
     if not grid: return 0
     rows, cols = len(grid), len(grid[0])
