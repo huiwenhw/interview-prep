@@ -49,6 +49,8 @@ console.log(arr2); // ["g", "q"]
 
 // Joins element of the array & returns a new string
 console.log(arr.join("-")); // "a-b-c"
+console.log(arr.join("")); // "abc"
+console.log(arr.join()); // "a,b,c"
 
 // O(end-start) Returns part of array defined by [start index, end index)
 console.log(arr.slice(1, 3)); // ["b", "c"]
