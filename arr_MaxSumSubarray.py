@@ -9,35 +9,35 @@ the contiguous subarray [4,-1,2,1] has the largest sum = 6.
 
 import sys
 
-# maxind is to keep track of negative numbers
+# O(n) time O(1) space
 def max_subarray(nums):
-    curr, maxnum, maxind = 0, 0, float('-inf')
-    summed = False
-    for num in nums:
-        maxind = max(maxind, num)
-        if curr + num < 0:
-            curr = 0
-        else: 
-            curr = curr + num
-        if curr > maxnum:
-            summed = True
-            maxnum = curr
-    if summed: return maxnum
-    return maxind
+    """
+    :type nums: List[int]
+    :rtype: int
+    """
+    currsum, maxn = 0, float('-inf')
+    for i in range(len(nums)):
+        if currsum + nums[i] > 0:
+            currsum += nums[i]
+            maxn = max(maxn, currsum)
+        else:				# to get max of -ve integers
+            currsum = 0
+            maxn = max(maxn, nums[i])
+    return maxn
 
 def max_subarray_short(nums):
     curr_sum = max_sum = nums[0]
     for num in nums[1:]:
         curr_sum = max(curr_sum + num, num)
         max_sum = max(max_sum, curr_sum)
-        print num, curr_sum, max_sum
+        print(num, curr_sum, max_sum)
     return max_sum
 
 def main():
     nums = sys.argv[1].split(",")
     nums = [int(i) for i in nums]
-    print max_subarray(nums)
-    print max_subarray_short(nums)
+    print(max_subarray(nums))
+    print(max_subarray_short(nums))
 
 if __name__ == '__main__':
     main()
