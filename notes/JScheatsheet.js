@@ -140,5 +140,62 @@ const foundIndex = objects.findIndex(item => {
 console.log(foundIndex); // 2, return -1 if item not found
 
 
+// Finding length of object 
+Object.keys(obj).length
 
+// Closures and Event Listeners in for loops 
+// clear the screen for testing
+document.body.innerHTML = '';
 
+var nums = [1,2,3];
+
+// Let's loop over the numbers in our array
+for (var i = 0; i < nums.length; i++) {
+
+    // This is the number we're on...
+    var num = nums[i];
+
+    // We're creating a DOM element for the number
+    var elem = document.createElement('div');
+    elem.textContent = num;
+
+    // we create an inner scope to hold the value of num 
+    // at the exact moment we add the event listener 
+    // and we immediately invoke it by passing in the value of num
+    // the outer function then stores the value of num 
+    // ... and when we click, alert the value of `num`
+    elem.addEventListener('click', (function(numCopy) {
+    	// this inner function can access numCopy cause of JS scope
+        return function() {
+            alert(numCopy);
+        };
+    })(num));
+
+    document.body.appendChild(elem);
+};
+
+// or use the let variable 
+// clear the screen for testing
+document.body.innerHTML = '';
+document.body.style.background="white";
+
+let nums = [1,2,3];
+
+// Let's loop over the numbers in our array
+for (let i = 0; i < nums.length; i++) {
+
+    // This is the number we're on...
+    let num = nums[i];
+
+    // We're creating a DOM element for the number
+    var elem = document.createElement('div');
+    elem.textContent = num;
+
+    // ... and when we click, alert the value of `num`
+    elem.addEventListener('click', function() {
+        alert(num);
+    });
+
+    // finally, let's add this element to the document
+    document.body.appendChild(elem);
+};

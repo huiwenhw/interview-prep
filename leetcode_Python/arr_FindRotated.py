@@ -25,6 +25,7 @@ def findRotated(nums, target):
     start, end = 0, len(nums)-1
     while start <= end:
         mid = int((start + end) / 2)
+        print('start ', start, ' end ', end, ' mid ', mid, ' nums[mid] ', nums[mid])
         if nums[mid] == target: 
             return mid
         # ascending
