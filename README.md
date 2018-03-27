@@ -1,9 +1,12 @@
-Below are a list of topics and useful 'must-knows' that I curated specially to check if we've covered the basics we need!  
-I'm using Python in all the code snippets below!  
+# Interview cheatsheet 
+
+Below are a list of topics and useful 'must-knows' that are curated specially to cover the basics! All code snippets are in Python.  
 Feel free to click on the example links to check out the actual leetcode question.
 
 Check out the leetcode_Python/Javascript folder for answers to leetcode questions in Python and Javascript respectively! 
 Note: Javascript questions are still in progress!
+
+Topics covered: [Linkedlist](#linkedlist), [Graph](#graph), [Trees](#trees), [Arrays](#arrays), [Strings](#strings), [DP](#dp), [Math](#math), [Binary](#binary)
 
 # Topics
 ### LinkedList
@@ -76,13 +79,58 @@ def reverse(head):
 ```
 
 ### Graph
-BFS [Example]()
+BFS [Example](https://github.com/huiwenhw/interview-prep/blob/master/leetcode_Python/graph_CloneGraph.py)
 ```python
+# Using the clone graph example
+class UndirectedGraphNode:
+    def __init__(self, x):
+        self.label = x
+        self.neighbors = []
+
+def clone_bfs(node):
+    if not node: return node
+    q = []
+    visited = {node : UndirectedGraphNode(node.label)}
+    q.append((node, visited[node]))
+    
+    while q:
+    	curr, clone = q.pop(0)
+	for n in curr.neighbors:
+	    if n not in visited:
+	        visited[n] = UndirectedGraphNode(n.label)
+		q.append((n, visited[n]))
+	    clone.neighbors.append(visited[n])
+    return visited[node]
 ```
 
-DFS [Example]()  
-Tip: Use a directions array [[-1,0], [1, 0], [0, 1], [0, -1]] when traversing through matrices
+DFS [Example](https://leetcode.com/problems/longest-increasing-path-in-a-matrix/description/)  
+Tip: Use a directions array [[-1,0], [1, 0], [0, 1], [0, -1]] when traversing through matrices  
 ```python
+# Find longest increasing path in a integer matrix 
+def longest_path(matrix):
+    if matrix == []: return 0
+    rows, cols = len(matrix), len(matrix[0])
+    memo = [[0 for _ in range(cols)] for _ in range(rows)]
+    
+    def dfs(i, j, currlen):
+    	if memo[i][j] != 0: return memo[i][j]
+	
+	maxl, returned_len = 0, 0
+	directions = ((-1,0), (1, 0), (0, 1), (0, -1))				# for checking all neighbouring cells 
+	for direction in directions:
+	    next_i, next_j = i + direction[0], j + direction[1]
+	    if 0 <= next_i and next_i < rows and 0 <= next_j and next_j < cols:	  # check boundaries
+	        if matrix[next_i][next_j] > matrix[i][j]:			  # proceed only if next cell > current cell
+		    returned_len = dfs(next_i, next_j, currlen)
+	    maxl = max(currlen, returned_len, maxl)
+	memo[i][j] = maxl + 1
+	return memo[i][j]
+
+    ans = -1
+    for p in range(rows):
+        for q in range(cols):
+	    ans = max(ans, dfs(p, q, 0))
+    return ans 
 ```
 
 Topological Sort: Presents a ordering such that for vertices UV, vertex U always comes before V in the ordering.  
