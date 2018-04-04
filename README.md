@@ -390,6 +390,163 @@ def subsets_iterative(nums):
     return ans 
 ```
 
+Permutations [Example](https://github.com/huiwenhw/interview-prep/blob/master/leetcode_Python/arr_Permutations.py)
+```python
+def permutation(nums):
+    if len(nums) == 0: return [[]]
+
+    perms = [[]]
+    for num in nums:
+        newperm = []
+        for perm in perms:
+            for i in range(len(perm)+1):
+                newperm.append(perm[:i] + [num] + perm[i:])	# insert num between indexes
+        perms = newperm
+    return perms 
+```
+
+Letter combinations of a phone number [Example](https://github.com/huiwenhw/interview-prep/blob/master/leetcode_Python/arr_LetterCombinations.py)  
+```python
+'''
+Input:Digit string "23"
+Output: ["ad", "ae", "af", "bd", "be", "bf", "cd", "ce", "cf"]
+'''
+
+def letterCombinations(digits):
+    if not digits: return []
+    mapping = {"2":"abc" , "3":"def" , "4":"ghi" , "5":"jkl" , "6":"mno" , "7":"pqrs" , "8":"tuv" , "9":"wxyz"}
+
+    ans = [""]
+    for digit in digits:
+        temp = []
+        for s in ans:
+            temp += [s + ch for ch in mapping[digit]]
+        ans = temp
+    return ans 
+```
+
+Longest consecutive element sequence [Example](https://github.com/huiwenhw/interview-prep/blob/master/leetcode_Python/arr_LongestConsecutive.py)  
+```python
+'''
+convert nums to a set 
+go through the set: if curr-1 is not in the set, means its the first element in a sequence 
+# keep a count for consecutive elements present in the set 
+'''
+def longestConsecutive(nums):
+    if nums == []: return 0
+    d = set(nums)
+    maxn = float('-inf')
+
+    for num in d:
+        count = 0
+        if num-1 not in d:
+            temp = num
+            while temp in d:
+                count += 1
+                temp += 1
+            maxn = max(maxn, count)
+
+    return maxn
+```
+
+Consecutive subarray sum [Example](https://github.com/huiwenhw/interview-prep/blob/master/leetcode_Python/arr_ConsecutiveSum.py)
+```python
+'''
+Given array and s, find min subarray length where sum of subarray >= s
+'''
+def minSubArrayLen(s, nums):
+    start, end = 0, 0
+    currsum, length = 0, float('inf')
+
+    while start <= end and end < len(nums):
+        if currsum < s:					# add curr elem to currsum and keep going
+            currsum += nums[end]
+            end += 1
+        while currsum >= s:				# shift start pointer right till currsum is < s 
+            length = min(length, end - 1 - start + 1)	# keep track of the length
+            currsum -= nums[start]
+            start += 1
+
+    if length == float('inf'):				# means subarray is not found, length = 0
+        return 0
+    return length 
+```
+
+Maximum sum subarray [Example](https://github.com/huiwenhw/interview-prep/blob/master/leetcode_Python/arr_MaxSumSubarray.py)  
+```python
+'''
+Find the contiguous subarray within an array (containing at least one number) which has the largest sum.
+E.G. given the array [-2,1,-3,4,-1,2,1,-5,4],
+the contiguous subarray [4,-1,2,1] has the largest sum = 6.
+'''
+def max_subarray_short(nums):
+    curr_sum = max_sum = nums[0]
+    for num in nums[1:]:
+        curr_sum = max(curr_sum + num, num)
+        max_sum = max(max_sum, curr_sum)
+    return max_sum
+```
+
+Maximum product subarray [Example](https://github.com/huiwenhw/interview-prep/blob/master/leetcode_Python/arr_MaxProductSubarray.py)  
+```python
+# Keep big and small product at each element, cause we never know when a negative can become positive 
+
+def max_subarray_short(nums):
+    if len(nums) <= 1: return nums[0]
+    maxnum = big = small = nums[0]
+    for num in nums[1:]:
+        big, small = max(num, num*big, num*small), min(num, num*big, num*small)
+        maxnum = max(maxnum, big)
+    return maxnum
+```
+
+Container with most water [Example](https://github.com/huiwenhw/interview-prep/blob/master/leetcode_Python/arr_ContainerWater.py)  
+```python
+'''
+Given an array height, each elem represents a point (i, height[i]) 
+Find two lines, which together with x-axis forms a container, such that the container contains the most water.
+
+want to find container with max height and max width btwn them 
+start from ends of array, shift shorter side in 
+keep checking the max. stop when we reach the middle 
+'''
+def maxArea(height):
+    start, end = 0, len(height) - 1
+    area = float('-inf')
+
+    while start < end:
+        h = min(height[start], height[end])
+        area = max(area, h * (end-start))
+        if height[start] < height[end]:
+            start += 1
+        else:
+            end -= 1
+    return area 
+```
+
+Largest Rectangle Area [Example](https://github.com/huiwenhw/interview-prep/blob/master/leetcode_Python/arr_LargestRectangleArea.py)  
+```python
+'''
+keep ascending buildings index in a stack
+loop: if a descending building is detected, pop out the latest building from the stack
+algo checks for every peak in the array and keeps the ascending elements 
+once all ascendings buildings are added at index i, check 
+use dummy building at the end to calc the 'final' ascending buildings
+'''
+
+def area_short(height):
+    height.append(0)		# dummy building at the end to calc the 'final' ascending buildings
+    stack = [-1]		# dummy first building index
+    ans = 0
+    for i in range(len(height)):
+        while height[i] < height[stack[-1]]:	# check curr height against stack of buildings
+            h = height[stack.pop()]		# if curr is smaller, pop latest building = h
+            w = i - stack[-1] - 1		# get width = curr index - last ascending building index before this - 1
+            ans = max(ans, h * w)
+        stack.append(i)
+    height.pop()
+```
+
 ### Strings
 Runtime for common string methods  
 Permutation [Example](https://github.com/huiwenhw/interview-prep/blob/master/leetcode_Python/arr_Permutations.py)   
