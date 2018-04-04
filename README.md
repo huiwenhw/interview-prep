@@ -1,6 +1,6 @@
 # Interview cheatsheet 
 
-Below are a list of topics and useful 'must-knows' that are curated specially to cover the basics! All code snippets are in Python.  
+Below are a list of topics and useful 'must-knows' that are specially curated to cover the basics! All code snippets are in Python.  
 Feel free to click on the example links to check out the actual leetcode question.
 
 Check out the leetcode_Python/Javascript folder for answers to leetcode questions in Python and Javascript respectively! 
@@ -72,7 +72,7 @@ def reverse(head):
   prev = None
   while head:
       curr = head
-      head = head.next
+      head = head.next	# assign head to next node before its reference change
       curr.next = prev
       prev = curr
   return prev
@@ -106,7 +106,15 @@ def clone_bfs(node):
 DFS [Example](https://leetcode.com/problems/longest-increasing-path-in-a-matrix/description/)  
 Tip: Use a directions array [[-1,0], [1, 0], [0, 1], [0, -1]] when traversing through matrices  
 ```python
-# Find longest increasing path in a integer matrix 
+'''
+Find longest increasing path in a integer matrix 
+nums = [
+  [9,9,4],
+  [6,6,8],
+  [2,1,1]
+]
+Return 4, the longest increasing path is [1, 2, 6, 9]
+'''
 def longest_path(matrix):
     if matrix == []: return 0
     rows, cols = len(matrix), len(matrix[0])
@@ -134,10 +142,18 @@ def longest_path(matrix):
 ```
 
 Topological Sort: Presents a ordering such that for vertices UV, vertex U always comes before V in the ordering.  
+[Example](https://github.com/huiwenhw/interview-prep/blob/master/leetcode_Python/graph_CourseSchedule.py)  
 
-Topo sort - BFS: Kahn's algorithm, taken from [wiki](https://en.wikipedia.org/wiki/Topological_sorting).  
+Topological Sort BFS: Kahn's algorithm, taken from [wiki](https://en.wikipedia.org/wiki/Topological_sorting).  
 A topo sort can only occur if and only if graph is a Directed Acyclic Graph. Therefore it must have a start node where it has no incoming edges.
 ```python
+'''
+Course schedule: Given the total number of courses and a list of prerequisite pairs, 
+is it possible for you to finish all courses?
+E.G: 2, [[1,0],[0,1]]
+There are a total of 2 courses to take. To take course 1 you should have finished course 0, 
+and to take course 0 you should also have finished course 1. So it is impossible. Return False.
+'''
 from collections import defaultdict, deque
 def find_order(numCourses, prerequisites):
     inedges, outedges = defaultdict(deque), defaultdict(deque)
@@ -164,7 +180,7 @@ def find_order(numCourses, prerequisites):
                 queue.append(nei)
     return ans if len(ans) == numCourses else []
 ```
-Topo sort - DFS
+Topological Sort DFS
 
 Algo: Traverse through each unvisited node.  
 If node is visited, return. If node is marked as visiting, cycle is found. Else, mark node as visiting, dfs.  
@@ -179,20 +195,20 @@ def find_order(numCourses, prerequisites):
     visited = [0 for _ in range(numCourses)]
     
     def dfs(node):
-        if visited[node] == 1: 
+        if visited[node] == 1: 		# node is visited, return True
             return True
-        if visited[node] == -1:
+        if visited[node] == -1:		# node is still visiting. Cycle detected, return False
             return False
-        visited[node] = -1
+        visited[node] = -1		# mark node as visiting
         
         for nei in graph[node]:
             if dfs(nei) == False:
                 return False
-        visited[node] = 1
+        visited[node] = 1		# done visiting, mark node as visited 
         ans.append(node)
         return True
 
-    for i in range(numCourses):
+    for i in range(numCourses):		# traverse through each unvisited node 
         if dfs(i) == False:
             return []
     return ans
@@ -200,10 +216,14 @@ def find_order(numCourses, prerequisites):
 
 Dijkstra: Finds shortest path between nodes in a weighted graph [Example](https://github.com/huiwenhw/interview-prep/blob/master/leetcode_Python/graph_Dijkstra.py)
 ```python
+'''
+times: List[List[int]], N = num of vertices, K = start node 
+return min dist to ensure all nodes are traversed 
+'''
+
 import heapq
 import collections
-# times: List[List[int]], N = num of vertices, K = start node 
-# return min dist to ensure all nodes are traversed 
+
 def networkDelayTime(times, N, K):
     # converting edge list to adjacency list of u: [(v, w)]
     adj = collections.defaultdict(list)
@@ -235,7 +255,7 @@ class TreeNode(object):
         self.left = None 
         self.right = None
 ```
-Tree Traversals - Inorder: Left, Parent, Right  
+Tree Traversals - Inorder: Left, Parent, Right [Example](https://github.com/huiwenhw/interview-prep/blob/master/leetcode_Python/tree_TreeTraversals.py)  
 ```python
 def inorder(root):
     if root is None:
@@ -315,13 +335,40 @@ Definitions of trees
   
  
 ### Arrays  
-Common operators (insert / delete / append), Reverse / Contain / Iteration  
-Runtime for common operators  
+Runtime for common operators [ref](https://www.ics.uci.edu/~pattis/ICS-33/lectures/complexitypython.txt)  
+
+| Operation | Example | Complexity | Notes |  
+|-----------|---------|------------|-------|
+| access / Get | li[index] | O(1) | index |
+| set | li[index] = val | O(1) | |
+| append | li.append(5) | O(1) | Returns nothing |
+| pop | li.pop() | O(1) | Pops the last element |
+| length | len(li) | O(1) | |
+| clear | li.clear() | O(1) | Same as li = [] |
+| | | | 
+| slice | li[a:b] | O(len(b-a)) | Returns sliced list | 
+| extend | li.extend(nlist) | O(len(nlist)) | Returns nothing | 
+| construct / convert | list( {1,2,3,4} ) | O(len(set)) | Returns list |
+| | | |
+| equality check | list1 == list2 | O(N) | | 
+| insert | li.insert(0, 10) | O(N) | Insert 10 into 0th position. Returns nothing | 
+| copy | a = li.copy() | O(N) | Returns a copy of li | 
+| deepcopy | a = copy.deepcopy(li) | O(N) | For compound objects |
+| pop(i) | li.pop(0) | O(N) | Pops first element, all other elements have to be shifted up |
+| delete | del li[index] | O(N) | Removes element according to index | 
+| remove | li.remove(elem) | O(N) | Removes element | 
+| min / max | min(li) / max(li) | O(N) | Searches list | 
+| reverse | li.reverse() or li[::-1] | O(N) | | 
+| contain | x in li / x not in li: | O(N) | | 
+| iterate | for x in li: | O(N) | | 
+| | | | 
+| sort | li.sort() | O(NlogN) | Sorts original list. Returns nothing | 
+| sort | sorted(li) | O(NlogN) | Does not sort original list. Returns sorted list | 
+  
 
 Binary search [Example](https://github.com/huiwenhw/interview-prep/blob/master/leetcode_Python/arr_FindMin.py)  
-e.g. Suppose an array sorted in ascending order is rotated at some pivot unknown to you beforehand.  
-(i.e., 0 1 2 4 5 6 7 might become 4 5 6 7 0 1 2).
 ```python
+# Find minimum of rotated array (e.g. 4 5 6 7 0 1 2)
 def find_min(nums):
     start, end = 0, len(nums)-1
     while start < end:
@@ -333,7 +380,7 @@ def find_min(nums):
     return nums[start]  
 ```
 
-Subsets
+Subsets [Example](https://github.com/huiwenhw/interview-prep/blob/master/leetcode_Python/recur_Subsets.py)
 ```python
 # start from [[]], loop through nums array
 def subsets_iterative(nums):
