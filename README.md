@@ -1,7 +1,7 @@
 # Interview cheatsheet 
 
-Below are a list of topics and useful 'must-knows' that are specially curated to cover the basics! All code snippets are in Python.  
-Feel free to click on the example links to check out the actual leetcode question.
+Below is a list of topics and their respective useful algorithms and runtimes. All the examples below are specially curated to cover the basics of each topic. Feel free to click on the example links to check out the full version of the algorithm and the respective question.
+All code snippets are in Python.  
 
 Check out the leetcode_Python/Javascript folder for answers to leetcode questions in Python and Javascript respectively! 
 Note: Javascript questions are still in progress!
@@ -55,14 +55,12 @@ def remove_nth(head, n):
     for _ in range(n):
         fast = fast.next
 
-    # for cases with only 1 node, and n = 1
-    if fast is None: return head.next 
+    if fast is None: return head.next 		# for cases with only 1 node, and n = 1
 
     while fast.next:
         slow = slow.next
         fast = fast.next 
-    # slow is at n-1 node from end of list 
-    slow.next = slow.next.next
+    slow.next = slow.next.next			# slow is at n-1 node from end of list 
     return head
 ```
 
@@ -106,15 +104,14 @@ def clone_bfs(node):
 DFS [Example](https://leetcode.com/problems/longest-increasing-path-in-a-matrix/description/)  
 Tip: Use a directions array [[-1,0], [1, 0], [0, 1], [0, -1]] when traversing through matrices  
 ```python
-'''
-Find longest increasing path in a integer matrix 
-nums = [
-  [9,9,4],
-  [6,6,8],
-  [2,1,1]
-]
-Return 4, the longest increasing path is [1, 2, 6, 9]
-'''
+# Find longest increasing path in a integer matrix 
+# nums = [
+#  [9,9,4],
+#  [6,6,8],
+#  [2,1,1]
+#  ]
+# Given nums above, Return 4. Reason: the longest increasing path is [1, 2, 6, 9]
+
 def longest_path(matrix):
     if matrix == []: return 0
     rows, cols = len(matrix), len(matrix[0])
@@ -147,13 +144,11 @@ Topological Sort: Presents a ordering such that for vertices UV, vertex U always
 Topological Sort BFS: Kahn's algorithm, taken from [wiki](https://en.wikipedia.org/wiki/Topological_sorting).  
 A topo sort can only occur if and only if graph is a Directed Acyclic Graph. Therefore it must have a start node where it has no incoming edges.
 ```python
-'''
-Course schedule: Given the total number of courses and a list of prerequisite pairs, 
-is it possible for you to finish all courses?
-E.G: 2, [[1,0],[0,1]]
-There are a total of 2 courses to take. To take course 1 you should have finished course 0, 
-and to take course 0 you should also have finished course 1. So it is impossible. Return False.
-'''
+# Given the total number of courses and a list of prerequisite pairs, 
+# is it possible for you to finish all courses?
+# Given 2, [[1,0],[0,1]] 
+# Return False. Reason: To take course 1 you should have finished course 0 and vice versa, impossible.  
+
 from collections import defaultdict, deque
 def find_order(numCourses, prerequisites):
     inedges, outedges = defaultdict(deque), defaultdict(deque)
@@ -186,6 +181,8 @@ Algo: Traverse through each unvisited node.
 If node is visited, return. If node is marked as visiting, cycle is found. Else, mark node as visiting, dfs.  
 Done visiting, mark node as visited, add node to ans list.  
 ```python
+# same question as above, this time using dfs to solve
+
 def find_order(numCourses, prerequisites):
     graph = defaultdict(list)
     for u,v in prerequisites:
@@ -216,17 +213,15 @@ def find_order(numCourses, prerequisites):
 
 Dijkstra: Finds shortest path between nodes in a weighted graph [Example](https://github.com/huiwenhw/interview-prep/blob/master/leetcode_Python/graph_Dijkstra.py)
 ```python
-'''
-times: List[List[int]], N = num of vertices, K = start node 
-return min dist to ensure all nodes are traversed 
-'''
+# times: list of travel times as directed edges, times[i] = (u, v, w)
+# N = num of vertices, K = start node 
+# Return min dist to ensure all nodes are traversed 
 
 import heapq
 import collections
 
 def networkDelayTime(times, N, K):
-    # converting edge list to adjacency list of u: [(v, w)]
-    adj = collections.defaultdict(list)
+    adj = collections.defaultdict(list)		  # convert edge list to adjacency list of u: [(v, w), (v2, w2), ...]
     for u,v,w in times:
         adj[u].append((v, w))
 
@@ -236,15 +231,15 @@ def networkDelayTime(times, N, K):
     
     while pq:
         currdist, currnode = heapq.heappop(pq)    # extract min
-        if currnode in dist: continue             # node is visited. since we always extract min, this dist will be
-        dist[currnode] = currdist                 # more than the one in dist dict 
+        if currnode in dist: continue             # node is visited. since we always extract min, if currnode in dist,
+        dist[currnode] = currdist                 # currdist will be more than the min dist of the currnode
 
         for nei,w in adj[currnode]:
             if nei not in dist: 
                 heapq.heappush(pq, (currdist + w, nei))   # if node is not visited, add to pq
 
-maxn = max(dist.values())
-return maxn if len(dist) == N else -1
+    maxn = max(dist.values())
+    return maxn if len(dist) == N else -1
 ```
   
 ### Trees
@@ -335,7 +330,7 @@ Definitions of trees
   
  
 ### Arrays  
-Runtime for common operators [ref](https://www.ics.uci.edu/~pattis/ICS-33/lectures/complexitypython.txt)  
+Runtime for common operators, reference [here](https://www.ics.uci.edu/~pattis/ICS-33/lectures/complexitypython.txt)  
 
 | Operation | Example | Complexity | Notes |  
 |-----------|---------|------------|-------|
@@ -368,7 +363,9 @@ Runtime for common operators [ref](https://www.ics.uci.edu/~pattis/ICS-33/lectur
 
 Binary search [Example](https://github.com/huiwenhw/interview-prep/blob/master/leetcode_Python/arr_FindMin.py)  
 ```python
-# Find minimum of rotated array (e.g. 4 5 6 7 0 1 2)
+# Find minimum of rotated array 
+# Given nums = [4 5 6 7 0 1 2], Result = 0
+
 def find_min(nums):
     start, end = 0, len(nums)-1
     while start < end:
@@ -382,7 +379,9 @@ def find_min(nums):
 
 Subsets [Example](https://github.com/huiwenhw/interview-prep/blob/master/leetcode_Python/recur_Subsets.py)
 ```python
+# Given [1,2,3], Result = [[], [1], [2], [1, 2], [3], [1, 3], [2, 3], [1, 2, 3]]
 # start from [[]], loop through nums array
+
 def subsets_iterative(nums):
     ans = [[]]
     for num in nums:
@@ -392,6 +391,8 @@ def subsets_iterative(nums):
 
 Permutations [Example](https://github.com/huiwenhw/interview-prep/blob/master/leetcode_Python/arr_Permutations.py)
 ```python
+# Given [1, 2, 3], Result = [[3, 2, 1], [2, 3, 1], [2, 1, 3], [3, 1, 2], [1, 3, 2], [1, 2, 3]]
+
 def permutation(nums):
     if len(nums) == 0: return [[]]
 
@@ -407,10 +408,7 @@ def permutation(nums):
 
 Letter combinations of a phone number [Example](https://github.com/huiwenhw/interview-prep/blob/master/leetcode_Python/arr_LetterCombinations.py)  
 ```python
-'''
-Input:Digit string "23"
-Output: ["ad", "ae", "af", "bd", "be", "bf", "cd", "ce", "cf"]
-'''
+# Given: "23", Result = ["ad", "ae", "af", "bd", "be", "bf", "cd", "ce", "cf"]
 
 def letterCombinations(digits):
     if not digits: return []
@@ -427,11 +425,12 @@ def letterCombinations(digits):
 
 Longest consecutive element sequence [Example](https://github.com/huiwenhw/interview-prep/blob/master/leetcode_Python/arr_LongestConsecutive.py)  
 ```python
-'''
-convert nums to a set 
-go through the set: if curr-1 is not in the set, means its the first element in a sequence 
+# Given [100, 4, 200, 1, 3, 2], Result = 4
+# Reason: the longest consecutive elements sequence is [1, 2, 3, 4]
+# Algo: convert nums to a set, go through the set
+# if curr-1 is not in the set, means its the first element in a sequence 
 # keep a count for consecutive elements present in the set 
-'''
+
 def longestConsecutive(nums):
     if nums == []: return 0
     d = set(nums)
@@ -451,9 +450,10 @@ def longestConsecutive(nums):
 
 Consecutive subarray sum [Example](https://github.com/huiwenhw/interview-prep/blob/master/leetcode_Python/arr_ConsecutiveSum.py)
 ```python
-'''
-Given array and s, find min subarray length where sum of subarray >= s
-'''
+# Given array and s, find min subarray length where sum of subarray >= s
+# Given nums = [2,3,1,2,4,3] s = 7, Result = 2
+# the subarray [4,3] has the minimal length
+
 def minSubArrayLen(s, nums):
     start, end = 0, 0
     currsum, length = 0, float('inf')
@@ -474,11 +474,10 @@ def minSubArrayLen(s, nums):
 
 Maximum sum subarray [Example](https://github.com/huiwenhw/interview-prep/blob/master/leetcode_Python/arr_MaxSumSubarray.py)  
 ```python
-'''
-Find the contiguous subarray within an array (containing at least one number) which has the largest sum.
-E.G. given the array [-2,1,-3,4,-1,2,1,-5,4],
-the contiguous subarray [4,-1,2,1] has the largest sum = 6.
-'''
+# Find the subarray within an array (containing at least one number) which has the largest sum.
+# Given [-2,1,-3,4,-1,2,1,-5,4], Result = 6
+# Reason: the subarray [4,-1,2,1] has the largest sum = 6
+
 def max_subarray_short(nums):
     curr_sum = max_sum = nums[0]
     for num in nums[1:]:
@@ -490,6 +489,8 @@ def max_subarray_short(nums):
 Maximum product subarray [Example](https://github.com/huiwenhw/interview-prep/blob/master/leetcode_Python/arr_MaxProductSubarray.py)  
 ```python
 # Keep big and small product at each element, cause we never know when a negative can become positive 
+# Given [-2,3,-4], Result = 24 
+# Reason: -2 * 3 * -4 = 24
 
 def max_subarray_short(nums):
     if len(nums) <= 1: return nums[0]
@@ -500,16 +501,16 @@ def max_subarray_short(nums):
     return maxnum
 ```
 
-Container with most water [Example](https://github.com/huiwenhw/interview-prep/blob/master/leetcode_Python/arr_ContainerWater.py)  
+Max area between elements a.k.a: Container with most water [Example](https://github.com/huiwenhw/interview-prep/blob/master/leetcode_Python/arr_ContainerWater.py)  
 ```python
-'''
-Given an array height, each elem represents a point (i, height[i]) 
-Find two lines, which together with x-axis forms a container, such that the container contains the most water.
+# Given array of heights, each elem represents a point (i, height[i]) 
+# Find two lines, which together with x-axis forms a container, such that the container contains the most water.
+# Given [4, 1, 3, 4], Result = 12 
 
-want to find container with max height and max width btwn them 
-start from ends of array, shift shorter side in 
-keep checking the max. stop when we reach the middle 
-'''
+# Algo: want to find container with max height and max width btwn them 
+# start from ends of array, shift shorter side in 
+# keep checking the max. stop when we reach the middle 
+
 def maxArea(height):
     start, end = 0, len(height) - 1
     area = float('-inf')
