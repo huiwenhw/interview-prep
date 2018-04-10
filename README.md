@@ -6,7 +6,7 @@ All code snippets are in Python.
 Check out the leetcode_Python/Javascript folder for answers to leetcode questions in Python and Javascript respectively! 
 Note: Javascript questions are still in progress!
 
-Topics covered: [Linkedlist](#linkedlist), [Graph](#graph), [Trees](#trees), [Arrays](#arrays), [Strings](#strings), [DP](#dp), [Math](#math), [Binary](#binary)
+Topics covered: [Linkedlist](#linkedlist), [Graph](#graph), [Trees](#trees), [Arrays](#arrays), [Strings](#strings), [DP](#dynamicprogramming), [Math](#math), [Binary](#binary)
 
 # Topics
 ### LinkedList
@@ -501,7 +501,7 @@ def max_subarray_short(nums):
     return maxnum
 ```
 
-Max area between elements a.k.a: Container with most water [Example](https://github.com/huiwenhw/interview-prep/blob/master/leetcode_Python/arr_ContainerWater.py)  
+Max area between two elements a.k.a: Container with most water [Example](https://github.com/huiwenhw/interview-prep/blob/master/leetcode_Python/arr_ContainerWater.py)  
 ```python
 # Given array of heights, each elem represents a point (i, height[i]) 
 # Find two lines, which together with x-axis forms a container, such that the container contains the most water.
@@ -525,15 +525,15 @@ def maxArea(height):
     return area 
 ```
 
-Largest Rectangle Area [Example](https://github.com/huiwenhw/interview-prep/blob/master/leetcode_Python/arr_LargestRectangleArea.py)  
+Max area under elements a.k.a: Largest Rectangle Area [Example](https://github.com/huiwenhw/interview-prep/blob/master/leetcode_Python/arr_LargestRectangleArea.py)  
 ```python
-'''
-keep ascending buildings index in a stack
-loop: if a descending building is detected, pop out the latest building from the stack
-algo checks for every peak in the array and keeps the ascending elements 
-once all ascendings buildings are added at index i, check 
-use dummy building at the end to calc the 'final' ascending buildings
-'''
+# Given array of heights, find largest area (imagine histogram) 
+# Given [5,5,1,7,1,1,5,2,7,6], Result = 12 
+
+# Algo: Checks for every peak in the array and keeps the ascending elements in a stack 
+# loop: if a descending building is detected, pop out the latest building from the stack
+# once all ascendings buildings are added at index i, check 
+# use dummy building at the end to calc the 'final' ascending buildings
 
 def area_short(height):
     height.append(0)		# dummy building at the end to calc the 'final' ascending buildings
@@ -580,6 +580,119 @@ def permutations_iterative(nums):
     return perms
 ```
 
+### DynamicProgramming  
+DP questions must have a 
+1. Optimal Substructure: A problem has an optimal substructure if an optimal solution can be constructed from optimal solutions of its subproblems.  
+2. Overlapping subproblems. A recursive solution contains a small number of distinct subproblems repeated many times.  
+
+Two ways to go about solving:  
+1. Top-down: Memoization - After computing a solution to a subproblem, save it in a table.  
+Often starts at the top, defining itself recursively. E.g. If we're calculating the fibonacci sequence, we'll call f(10) = f(9) + f(8) which will eventually call f(2) = f(1) + f(0) and will start to resolve f(3) = f(2) + f(1), but we don't need to recalc f(2) cause we've already cached it. 
+
+2. Bottom-up: Filling in table - Work from filling in cache from the bottom  
+E.g. If we're calculating the fibonacci sequence, we'll fill in f(2) = f(1) + f(0), f(3) = f(2) + f(1) and so on from previous saved results.  
+Easiest way to note the difference between these two is when we use recursion.
+
+Coin Change [Example](https://github.com/huiwenhw/interview-prep/blob/master/leetcode_Python/dp_CoinChange.py)
+```python
+# Given coins = [1, 2, 5], amount = 11
+# Find fewest number of coins we need to make up the amount
+# Result = 3 (11 = 5 + 5 + 1)
+
+def coinChange(coins, amount):
+    dp = [float('inf') for _ in range(amount+1)]	# dp[i] = num of coins needed to make up i
+    dp[0] = 0
+
+    for i in range(1, amount + 1):
+        for c in coins:
+            if i >= c:
+                dp[i] = min(dp[i], dp[i-c] + 1)		# dp[i-c] means how many ways to make up (i-c) amount
+							# if we use current coin c 
+    if dp[-1] == float('inf'): return -1		# unable to make up to that amount, return -1
+    return dp[-1]
+```
+
+Longest increasing subsequence [Example](https://github.com/huiwenhw/interview-prep/blob/master/leetcode_Python/dp_LongestIncreasingSubsequence.py)
+```python
+# Given [10, 9, 2, 5, 3, 7, 101, 18]
+# Result = 4, Reason: [2, 3, 7, 101]
+
+def lengthOfLIS(self, nums):
+    if nums == []: return 0
+    dp = [0 for _ in range(len(nums))]		# dp[i] stores longest increasing subsequence at i
+    dp[0] = 1
+
+    for i in range(1, len(nums)):		# for each num
+        maxn = 1
+        for k in range(i):			# loop through the previous numbers
+            if nums[i] > nums[k]:		# if curr num i < prev num
+                maxn = max(maxn, dp[k] + 1)	# find max subsequence 
+        dp[i] = maxn				# add to dp[i]
+    return max(dp)
+```
+
+Combination Sum [Example](https://github.com/huiwenhw/interview-prep/blob/master/leetcode_Python/dp_CombinationSumIV.py)
+```python
+# Given [1, 2, 3] and target = 4, find all possible combinations that add up to target
+# Result = 7 [(1, 1, 1, 1), (1, 1, 2), (1, 2, 1), (1, 3), (2, 1, 1), (2, 2), (3, 1)]
+# dp: i == numbers leading up to target, dp[i] == how many ways to reach this 
+# dp[0] = 0
+
+def combi(nums, target):
+    dp = [0] * (target+1)
+
+    for i in range(1, target+1):
+        for k in range(len(nums)):
+            if i == nums[k]:			# if curr target === num, add 1
+                dp[i] += 1
+            elif i > nums[k]:			
+                dp[i] += dp[i-nums[k]]		# find ways of (curr target - curr num)
+    return dp[-1]				# last entry = num of ways to reach target 
+```
+
+Minimum Path Sum in Matrix [Example]()  
+```python
+# Given a matrix, find a path from top left to bottom right which minimizes the sum of numbers along its path.
+# You can only move either down or right at any point in time.
+# Given [[1,3,1],
+# 	 [1,5,1],
+# 	 [4,2,1]]
+# Return 7. Reason: Path 1 > 3 > 1 > 1 > 1 minimizes the sum. 
+
+def minPathSum(grid):
+    rows, cols = len(grid), len(grid[0])
+    dp = [[float('inf') for _ in range(cols)] for _ in range(rows)]
+
+    dp[0][0] = grid[0][0]			# dp[i][k] represents min sum at matrix[i][k]
+    for i in range(1, cols):
+        dp[0][i] = grid[0][i] + dp[0][i-1]	# Adding up sums for first row
+    for i in range(1, rows):
+        dp[i][0] = grid[i][0] + dp[i-1][0]	# Adding up sums for first col
+    for i in range(1, rows):
+        for k in range(1, cols):
+            dp[i][k] = grid[i][k] + min(dp[i-1][k], dp[i][k-1]) # curr num + min(left, top)
+    return dp[rows-1][cols-1]
+```
+
+Word Break [Example](https://github.com/huiwenhw/interview-prep/blob/master/leetcode_Python/dp_WordBreak.py)  
+```python
+# Given string s and word dict, determine if s can be broken down into one or more dict words 
+# Given s = 'leetcode' and dict = ['leet', 'code'] 
+# Result = yes, Reason: 'leetcode' can be broken down into 'leet' and 'code'
+
+def wordbreak_readable(s, wordDict):
+    dp = [False for _ in range(len(s)+1)]
+    dp[0] = True
+ 
+    for i in range(len(s)):
+        if dp[i]:				# dp[i] == True means: I can start my next word from there
+            for k in range(i, len(s)):		# check: from curr letter to end of string 
+                if s[i:k+1] in wordDict:	# if substring i to k present in dict,
+                    dp[k+1] = True		# can start from next letter (k+1)
+    return dp[-1]
+	
+```
+
 ### Math
 int convert to ascii and vice versa  
 ```
@@ -587,13 +700,27 @@ Convert to ascii: base_ascii = ord(‘a’) # 95
 Convert ascii to string: str_ascii = chr(65) # 'A'
 ```
 
+Find total area covered by two rectangles [Example](https://github.com/huiwenhw/interview-prep/blob/master/leetcode_Python/math_RectArea.py)  
+```python
+# Given 4 pairs of coordinates, 
+# (A,B) and (C,D) refer to rect1's bottom left and top right coords
+# (E,F) and (G,H) refer to rect2's bottom left and top right coords 
+
+def compute_area_short(A, B, C, D, E, F, G, H):
+    overlap = x = y = total = 0
+    if E >= C or G <= A:		# check if rects x-axis do not overlap 
+        overlap = 0
+    elif F >= D or H <= B:		# check if rects y-axis do not overlap 
+        overlap = 0
+    else: 				# rectangles overlap
+        x = min(G, C) - max(E, A)	# calc overlap width 
+        y = min(D, H) - max(B, F)	# calc overlap height 
+    
+    overlap = x * y
+    total = (C-A)*(D-B) + (G-E)*(H-F) - overlap
+    return total 
+```
+
 ### Binary 
 Convert binary string to int
 Convert int to binary 
-
-
-Operators 
-### DP
-Memoization 
-Top - Down
-Bottom - Up 
